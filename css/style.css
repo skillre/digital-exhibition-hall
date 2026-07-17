@@ -451,6 +451,78 @@ html, body {
 }
 
 /* 响应式设计 */
+
+/* 小屏幕 */
+@media (max-width: 480px) {
+  .header {
+    height: 45px;
+    padding: 0 8px;
+  }
+
+  .logo {
+    font-size: 0.85rem;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .controls {
+    gap: 6px;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+
+  .footer {
+    height: 35px;
+    padding: 0 10px;
+    font-size: 0.75rem;
+  }
+
+  .hints {
+    display: none;
+  }
+
+  .minimap {
+    width: 120px;
+    height: 120px;
+    bottom: 45px;
+    right: 8px;
+  }
+
+  .modal-content {
+    width: 98%;
+    max-height: 98vh;
+    border-radius: 8px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .teleport-menu {
+    width: 85%;
+    padding: 15px;
+  }
+
+  .teleport-options {
+    grid-template-columns: 1fr;
+  }
+
+  .teleport-btn {
+    padding: 10px;
+  }
+}
+
+/* 中等屏幕 */
 @media (max-width: 768px) {
   .header {
     height: 50px;
@@ -479,5 +551,41 @@ html, body {
 
   .teleport-options {
     grid-template-columns: 1fr;
+  }
+}
+
+/* 平板和小桌面 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .header {
+    height: 55px;
+    padding: 0 15px;
+  }
+
+  .nav-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .minimap {
+    width: 175px;
+    height: 175px;
+    bottom: 55px;
+    right: 15px;
+  }
+
+  .modal-content {
+    width: 92%;
+    max-width: 700px;
+  }
+}
+
+/* 移动端汉堡菜单按钮 */
+@media (max-width: 768px) {
+  .header::after {
+    content: '\2630';
+    font-size: 1.5rem;
+    color: #fff;
+    cursor: pointer;
+    padding: 5px 10px;
   }
 }

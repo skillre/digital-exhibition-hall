@@ -1,108 +1,63 @@
 /**
- * 数字展厅主入口文件
+ * 数字展厅主入口文件（ES Module）
  * 负责初始化应用和协调各模块
  */
 
-// 全局配置
-const CONFIG = {
-  // 场景配置
-  scene: {
-    backgroundColor: 0x1a1a2e,
-    fog: {
-      enabled: true,
-      color: 0x1a1a2e,
-      near: 10,
-      far: 100
-    }
-  },
-  
-  // 相机配置
-  camera: {
-    fov: 75,
-    near: 0.1,
-    far: 1000,
-    position: { x: 0, y: 1.6, z: 5 }
-  },
-  
-  // 灯光配置
-  lighting: {
-    ambient: {
-      color: 0xffffff,
-      intensity: 0.4
-    },
-    directional: {
-      color: 0xffffff,
-      intensity: 0.8,
-      position: { x: 5, y: 10, z: 5 }
-    }
-  },
-  
-  // 玩家配置
-  player: {
-    moveSpeed: 5,
-    lookSpeed: 0.5,
-    height: 1.6,
-    collisionDistance: 0.5
-  },
-  
-  // 展厅配置
-  exhibition: {
-    width: 40,
-    height: 8,
-    depth: 40,
-    wallThickness: 0.3
-  }
-};
+import { CONFIG, AppState } from './config.js';
+import { SceneManager } from './scene/SceneManager.js';
+import { ExhibitionHall } from './objects/ExhibitionHall.js';
+import { PlayerControls } from './controls/PlayerControls.js';
+import { InteractionSystem } from './interaction/InteractionSystem.js';
+import { UIManager } from './ui/UIManager.js';
+import { Minimap } from './ui/Minimap.js';
 
-// 应用状态
-const AppState = {
-  isLoading: true,
-  isPlaying: false,
-  currentExhibition: null,
-  selectedPanel: null,
-  isModalOpen: false,
-  isTeleportMenuOpen: false
-};
-
-// 全局对象
+// 模块实例
 let sceneManager = null;
 let exhibitionHall = null;
 let playerControls = null;
 let interactionSystem = null;
 let uiManager = null;
+let minimap = null;
+
+// FPS 统计
+let frameCount = 0;
+let lastTime = performance.now();
+let fps = 60;
 
 /**
  * 初始化应用
  */
 async function initApp() {
   console.log('正在初始化数字展厅...');
-  
+
   try {
-    // 更新加载进度
     updateLoadingProgress(10, '初始化场景...');
-    
+
     // 创建场景管理器
     sceneManager = new SceneManager(CONFIG.scene, CONFIG.camera, CONFIG.lighting);
     sceneManager.init();
-    
+
     updateLoadingProgress(30, '创建展厅...');
-    
+
     // 创建展厅
     exhibitionHall = new ExhibitionHall(CONFIG.exhibition);
     exhibitionHall.create(sceneManager.scene);
-    
+
     updateLoadingProgress(50, '初始化控制...');
-    
-    // 初始化玩家控制
+
+    // 初始化玩家控制（传入 clock 用于真实帧时间差）
     playerControls = new PlayerControls(
       sceneManager.camera,
       sceneManager.renderer.domElement,
-      CONFIG.player
+      CONFIG.player,
+      sceneManager.clock
     );
     playerControls.init();
-    
+    // 注入碰撞对象
+    playerControls.setWalls(exhibitionHall.walls);
+
     updateLoadingProgress(70, '加载交互系统...');
-    
+
     // 初始化交互系统
     interactionSystem = new InteractionSystem(
       sceneManager.scene,
@@ -110,28 +65,38 @@ async function initApp() {
       exhibitionHall
     );
     interactionSystem.init();
-    
+
     updateLoadingProgress(85, '初始化界面...');
-    
+
     // 初始化 UI 管理器
     uiManager = new UIManager(exhibitionHall, playerControls, interactionSystem);
     uiManager.init();
-    
+
+    // 初始化小地图
+    minimap = new Minimap(CONFIG.exhibition, playerControls);
+    minimap.init();
+    minimap.setExhibitionZones([
+      { id: 'plans', name: '服务方案', x: -10, z: 0 },
+      { id: 'cases', name: '案例成果', x: 10, z: 0 },
+      { id: 'training', name: '培训教育', x: 0, z: -10 },
+      { id: 'docs', name: '技术文档', x: 0, z: 10 }
+    ]);
+
     updateLoadingProgress(95, '加载内容...');
-    
+
     // 加载展示内容
     await loadExhibitionContent();
-    
+
     updateLoadingProgress(100, '准备就绪！');
-    
+
     // 隐藏加载界面
     setTimeout(() => {
       hideLoadingScreen();
       startRenderLoop();
     }, 500);
-    
+
     console.log('数字展厅初始化完成！');
-    
+
   } catch (error) {
     console.error('初始化失败:', error);
     showError('初始化失败，请刷新页面重试');
@@ -148,15 +113,13 @@ async function loadExhibitionContent() {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     const contentData = await response.json();
-    
-    // 将内容数据传递给展厅
+
     exhibitionHall.loadContent(contentData);
-    
-    // 更新 UI
+
     if (uiManager) {
       uiManager.updateContentList(contentData);
     }
-    
+
   } catch (error) {
     console.error('加载内容失败:', error);
     showError('内容加载失败，请检查网络连接');
@@ -165,17 +128,15 @@ async function loadExhibitionContent() {
 
 /**
  * 更新加载进度
- * @param {number} progress - 进度百分比 (0-100)
- * @param {string} text - 加载提示文字
  */
 function updateLoadingProgress(progress, text) {
   const progressBar = document.getElementById('loading-progress');
   const loadingText = document.getElementById('loading-text');
-  
+
   if (progressBar) {
     progressBar.style.width = `${progress}%`;
   }
-  
+
   if (loadingText) {
     loadingText.textContent = text;
   }
@@ -194,7 +155,6 @@ function hideLoadingScreen() {
 
 /**
  * 显示错误信息
- * @param {string} message - 错误信息
  */
 function showError(message) {
   const loadingText = document.getElementById('loading-text');
@@ -209,51 +169,43 @@ function showError(message) {
  */
 function startRenderLoop() {
   AppState.isPlaying = true;
-  
-  // 动画循环
+
   function animate() {
     if (!AppState.isPlaying) return;
-    
+
     requestAnimationFrame(animate);
-    
-    // 更新玩家控制
+
     if (playerControls) {
       playerControls.update();
     }
-    
-    // 更新交互系统
-    if (interactionSystem) {
-      interactionSystem.update();
+
+    // 更新小地图
+    if (minimap) {
+      minimap.update();
     }
-    
-    // 更新 FPS 显示
+
     updateFPS();
-    
-    // 渲染场景
+
     if (sceneManager) {
       sceneManager.render();
     }
   }
-  
+
   animate();
 }
 
 /**
  * 更新 FPS 显示
  */
-let frameCount = 0;
-let lastTime = performance.now();
-let fps = 60;
-
 function updateFPS() {
   frameCount++;
   const currentTime = performance.now();
-  
+
   if (currentTime - lastTime >= 1000) {
     fps = Math.round(frameCount * 1000 / (currentTime - lastTime));
     frameCount = 0;
     lastTime = currentTime;
-    
+
     const fpsElement = document.getElementById('fps');
     if (fpsElement) {
       fpsElement.textContent = `FPS: ${fps}`;
@@ -274,7 +226,7 @@ function onWindowResize() {
 window.addEventListener('resize', onWindowResize);
 window.addEventListener('load', initApp);
 
-// 导出全局对象供其他模块使用
+// 导出全局对象供 InteractionSystem 等模块回调
 window.App = {
   config: CONFIG,
   state: AppState,
@@ -282,5 +234,6 @@ window.App = {
   exhibitionHall: () => exhibitionHall,
   playerControls: () => playerControls,
   interactionSystem: () => interactionSystem,
-  uiManager: () => uiManager
+  uiManager: () => uiManager,
+  minimap: () => minimap
 };
