@@ -1,0 +1,160 @@
+{
+  "exhibitions": [
+    {
+      "id": "plans",
+      "name": "服务方案区",
+      "description": "数据安全咨询服务方案",
+      "position": {
+        "x": -10,
+        "y": 0,
+        "z": 0
+      },
+      "panels": [
+        {
+          "id": "panel-001",
+          "type": "document",
+          "title": "数据分类分级方案",
+          "description": "帮助企业建立数据分类分级体系，实现数据精细化管理。本方案包含数据分类标准、分级方法、实施路径和最佳实践。",
+          "tags": ["数据安全", "分类分级", "合规"],
+          "thumbnail": "assets/images/data-classification.jpg",
+          "contentUrl": "content/documents/data-classification.pdf"
+        },
+        {
+          "id": "panel-002",
+          "type": "document",
+          "title": "数据安全治理方案",
+          "description": "全面的数据安全治理框架和实施路径，涵盖组织架构、制度流程、技术工具和人员能力四个维度。",
+          "tags": ["安全治理", "体系建设", "合规"],
+          "thumbnail": "assets/images/security-governance.jpg",
+          "contentUrl": "content/documents/security-governance.pdf"
+        },
+        {
+          "id": "panel-003",
+          "type": "document",
+          "title": "数据安全合规咨询",
+          "description": "针对《数据安全法》《个人信息保护法》等法规的合规咨询服务，帮助企业建立合规体系。",
+          "tags": ["合规", "法律法规", "咨询"],
+          "thumbnail": "assets/images/compliance.jpg",
+          "contentUrl": "content/documents/compliance-consulting.pdf"
+        }
+      ]
+    },
+    {
+      "id": "cases",
+      "name": "案例成果区",
+      "description": "成功案例展示",
+      "position": {
+        "x": 10,
+        "y": 0,
+        "z": 0
+      },
+      "panels": [
+        {
+          "id": "panel-004",
+          "type": "image",
+          "title": "金融行业案例",
+          "description": "为某大型银行实施数据安全体系建设项目，帮助客户通过监管合规检查，降低数据泄露风险。",
+          "tags": ["金融", "银行", "案例"],
+          "thumbnail": "assets/images/finance-case.jpg",
+          "contentUrl": "content/images/finance-case-detail.jpg"
+        },
+        {
+          "id": "panel-005",
+          "type": "video",
+          "title": "客户访谈视频",
+          "description": "客户分享数据安全服务体验，讲述项目实施过程和成效。",
+          "tags": ["客户反馈", "视频", "访谈"],
+          "thumbnail": "assets/images/interview-thumb.jpg",
+          "contentUrl": "content/videos/customer-interview.mp4"
+        },
+        {
+          "id": "panel-006",
+          "type": "chart",
+          "title": "服务成效数据",
+          "description": "展示数据安全服务带来的成效：风险降低 85%，合规达标率 98%，安全事件减少 70%。",
+          "tags": ["数据", "成效", "统计"],
+          "thumbnail": "assets/images/stats-thumb.jpg",
+          "contentUrl": "content/charts/achievement-stats.json"
+        }
+      ]
+    },
+    {
+      "id": "training",
+      "name": "培训教育区",
+      "description": "安全培训与教育资源",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": -10
+      },
+      "panels": [
+        {
+          "id": "panel-007",
+          "type": "video",
+          "title": "数据安全意识培训",
+          "description": "员工数据安全意识提升培训视频，涵盖数据安全基础知识、常见威胁和防护措施。",
+          "tags": ["培训", "安全意识", "视频"],
+          "thumbnail": "assets/images/training-thumb.jpg",
+          "contentUrl": "content/videos/security-training.mp4"
+        },
+        {
+          "id": "panel-008",
+          "type": "document",
+          "title": "安全操作手册",
+          "description": "日常数据安全操作指南，包含密码管理、数据传输、设备使用等规范。",
+          "tags": ["操作手册", "指南", "规范"],
+          "thumbnail": "assets/images/manual-thumb.jpg",
+          "contentUrl": "content/documents/security-manual.pdf"
+        },
+        {
+          "id": "panel-009",
+          "type": "document",
+          "title": "常见问题解答",
+          "description": "数据安全常见问题解答（FAQ），帮助员工快速解决日常工作中遇到的安全问题。",
+          "tags": ["FAQ", "常见问题", "解答"],
+          "thumbnail": "assets/images/faq-thumb.jpg",
+          "contentUrl": "content/documents/security-faq.pdf"
+        }
+      ]
+    },
+    {
+      "id": "docs",
+      "name": "技术文档区",
+      "description": "技术文档与白皮书",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 10
+      },
+      "panels": [
+        {
+          "id": "panel-010",
+          "type": "document",
+          "title": "数据安全白皮书",
+          "description": "数据安全技术发展趋势白皮书，分析当前数据安全形势和技术发展方向。",
+          "tags": ["白皮书", "技术趋势", "研究报告"],
+          "thumbnail": "assets/images/whitepaper-thumb.jpg",
+          "contentUrl": "content/documents/data-security-whitepaper.pdf"
+        },
+        {
+          "id": "panel-011",
+          "type": "document",
+          "title": "产品使用手册",
+          "description": "数据安全产品使用手册，详细说明产品功能、配置方法和最佳实践。",
+          "tags": ["产品", "使用手册", "文档"],
+          "thumbnail": "assets/images/product-manual-thumb.jpg",
+          "contentUrl": "content/documents/product-manual.pdf"
+        },
+        {
+          "id": "panel-012",
+          "type": "document",
+          "title": "API 接口文档",
+          "description": "数据安全平台 API 接口文档，供开发人员集成使用。",
+          "tags": ["API", "接口", "开发文档"],
+          "thumbnail": "assets/images/api-doc-thumb.jpg",
+          "contentUrl": "content/documents/api-documentation.pdf"
+        }
+      ]
+    }
+  ]
+}

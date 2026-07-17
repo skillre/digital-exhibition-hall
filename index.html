@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据安全服务数字展厅</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ui.css">
+</head>
+<body>
+  <!-- 加载界面 -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <h1>数据安全服务数字展厅</h1>
+      <div class="loading-bar">
+        <div class="loading-progress" id="loading-progress"></div>
+      </div>
+      <p class="loading-text" id="loading-text">加载中...</p>
+    </div>
+  </div>
+
+  <!-- 主容器 -->
+  <div id="app">
+    <!-- 3D 渲染画布 -->
+    <canvas id="canvas3d"></canvas>
+
+    <!-- UI 层 -->
+    <div id="ui-layer">
+      <!-- 顶部导航 -->
+      <header class="header">
+        <div class="logo">数据安全服务展厅</div>
+        <nav class="nav">
+          <button class="nav-btn" data-target="home">首页</button>
+          <button class="nav-btn" data-target="plans">服务方案</button>
+          <button class="nav-btn" data-target="cases">案例成果</button>
+          <button class="nav-btn" data-target="training">培训教育</button>
+          <button class="nav-btn" data-target="docs">技术文档</button>
+        </nav>
+        <div class="controls">
+          <button id="btn-help" class="icon-btn" title="帮助">❓</button>
+          <button id="btn-fullscreen" class="icon-btn" title="全屏">⛶</button>
+        </div>
+      </header>
+
+      <!-- 底部状态栏 -->
+      <footer class="footer">
+        <div class="status">
+          <span class="status-item" id="fps">FPS: 60</span>
+          <span class="status-item" id="position">位置: 0, 0, 0</span>
+        </div>
+        <div class="hints">
+          <span>WASD 移动 | 鼠标 视角 | 左键 交互 | ESC 退出</span>
+        </div>
+      </footer>
+
+      <!-- 小地图 -->
+      <div id="minimap" class="minimap">
+        <canvas id="minimap-canvas" width="200" height="200"></canvas>
+      </div>
+
+      <!-- 内容详情弹窗 -->
+      <div id="modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+          <button class="modal-close" id="modal-close">&times;</button>
+          <div class="modal-header">
+            <h2 id="modal-title">标题</h2>
+            <div class="modal-tags" id="modal-tags"></div>
+          </div>
+          <div class="modal-body" id="modal-body">
+            <!-- 内容预览区域 -->
+            <div id="preview-area">
+              <!-- PDF 预览 -->
+              <div id="pdf-preview" class="preview hidden">
+                <iframe id="pdf-viewer" src=""></iframe>
+              </div>
+              <!-- 图片预览 -->
+              <div id="image-preview" class="preview hidden">
+                <img id="image-viewer" src="" alt="">
+              </div>
+              <!-- 视频预览 -->
+              <div id="video-preview" class="preview hidden">
+                <video id="video-player" controls>
+                  <source src="" type="video/mp4">
+                </video>
+              </div>
+            </div>
+            <div class="modal-description" id="modal-description">
+              描述内容
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" id="btn-download">下载</button>
+            <button class="btn btn-secondary" id="btn-close">关闭</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 帮助弹窗 -->
+      <div id="help-modal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+          <button class="modal-close" id="help-close">&times;</button>
+          <div class="modal-header">
+            <h2>操作指南</h2>
+          </div>
+          <div class="modal-body">
+            <div class="help-section">
+              <h3>🎮 移动控制</h3>
+              <ul>
+                <li><kbd>W</kbd> 或 <kbd>↑</kbd> - 前进</li>
+                <li><kbd>S</kbd> 或 <kbd>↓</kbd> - 后退</li>
+                <li><kbd>A</kbd> 或 <kbd>←</kbd> - 左移</li>
+                <li><kbd>D</kbd> 或 <kbd>→</kbd> - 右移</li>
+                <li><kbd>Shift</kbd> - 加速移动</li>
+              </ul>
+            </div>
+            <div class="help-section">
+              <h3>👀 视角控制</h3>
+              <ul>
+                <li>鼠标移动 - 旋转视角</li>
+                <li>滚轮 - 缩放视角</li>
+              </ul>
+            </div>
+            <div class="help-section">
+              <h3>🖱️ 交互操作</h3>
+              <ul>
+                <li>鼠标左键 - 点击展板查看详情</li>
+                <li>ESC - 关闭弹窗</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 传送菜单 -->
+      <div id="teleport-menu" class="teleport-menu hidden">
+        <h3>快速传送</h3>
+        <div class="teleport-options">
+          <button class="teleport-btn" data-position="0,0,0">🏠 入口大厅</button>
+          <button class="teleport-btn" data-position="10,0,0">📋 服务方案</button>
+          <button class="teleport-btn" data-position="0,0,10">🏆 案例成果</button>
+          <button class="teleport-btn" data-position="-10,0,0">📚 培训教育</button>
+          <button class="teleport-btn" data-position="0,0,-10">📖 技术文档</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第三方库 -->
+  <script src="lib/three.min.js"></script>
+  <script src="lib/OrbitControls.js"></script>
+  <script src="lib/GLTFLoader.js"></script>
+  <script src="lib/DRACOLoader.js"></script>
+
+  <!-- 主程序 -->
+  <script src="js/main.js"></script>
+  <script src="js/scene/SceneManager.js"></script>
+  <script src="js/objects/ExhibitionHall.js"></script>
+  <script src="js/objects/Panel.js"></script>
+  <script src="js/controls/PlayerControls.js"></script>
+  <script src="js/interaction/InteractionSystem.js"></script>
+  <script src="js/ui/UIManager.js"></script>
+</body>
+</html>
