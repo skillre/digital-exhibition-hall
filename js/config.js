@@ -7,27 +7,27 @@
 export const THEME = {
   // 基调
   bgDeep: 0x0d1b2a,        // 深蓝黑 — 背景/雾
-  surfaceDark: 0x3a5577,   // 墙面（测试用 — 明显可见蓝灰）
-  surfaceMid: 0x446688,    // 天花（测试用）
+  surfaceDark: 0x3a5577,   // 墙面
+  surfaceMid: 0x446688,    // 天花
   // 强调
-  neon: 0x00d2ff,          // 青色霓虹 — 灯带/线框/数据点
-  ice: 0x0088ff,           // 冰蓝 — 全息投影
+  neon: 0x00d2ff,          // 青色霓虹
+  ice: 0x0088ff,           // 冰蓝
   // 点缀
-  safe: 0x00ff88,          // 翠绿 — 安全状态
-  threat: 0xff00aa,        // 品红 — 威胁/告警
-  // 材质参数
-  floor: { color: 0x3a5577, roughness: 0.2, metalness: 0.7, envMapIntensity: 1.5 },
-  wall: { color: 0x3a5577, roughness: 0.45, metalness: 0.15, envMapIntensity: 0.8 },
+  safe: 0x00ff88,          // 翠绿
+  threat: 0xff00aa,        // 品红
+  // 材质参数 — 低 metalness 让灯光更有效
+  floor: { color: 0x3a5577, roughness: 0.3, metalness: 0.4, envMapIntensity: 1.5 },
+  wall: { color: 0x3a5577, roughness: 0.5, metalness: 0.1, envMapIntensity: 0.8 },
   panel: { color: 0x0a1628, emissive: 0x00d2ff, emissiveIntensity: 0.6 },
   // 灯光 — 强力照明
-  ambient: { color: 0x8899bb, intensity: 1.2 },
-  directional: { color: 0xccddee, intensity: 1.5 },
+  ambient: { color: 0x99aabb, intensity: 1.5 },
+  directional: { color: 0xddeeff, intensity: 2.0 },
   hemisphere: { sky: 0x88aacc, ground: 0x3a5577, intensity: 1.0 },
   accent: { color: 0x00d2ff, intensity: 3.0 },
   // 雾 — 极淡
   fog: { color: 0x0d1b2a, density: 0.003 },
-  // 后处理
-  bloom: { strength: 0.4, radius: 0.3, threshold: 0.8 },
+  // 后处理 — 保守 Bloom
+  bloom: { strength: 0.3, radius: 0.3, threshold: 0.85 },
 };
 
 // 全局配置

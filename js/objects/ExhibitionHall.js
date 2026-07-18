@@ -69,12 +69,18 @@ export class ExhibitionHall {
 
   initMaterials() {
     // 深色镜面地面材质（Reflector 主反射 + 叠加深色半透明）
-    // 暂时用 MeshBasicMaterial 排查（不需要灯光/环境贴图）
-    this.materials.floor = new THREE.MeshBasicMaterial({ color: THEME.floor.color });
-    // 墙面
-    this.materials.wall = new THREE.MeshBasicMaterial({ color: THEME.wall.color });
-    // 天花板
-    this.materials.ceiling = new THREE.MeshBasicMaterial({ color: THEME.surfaceMid });
+    // PBR 材质 — 需要足够灯光
+    this.materials.floor = new THREE.MeshStandardMaterial({
+      color: THEME.floor.color, roughness: THEME.floor.roughness,
+      metalness: THEME.floor.metalness, envMapIntensity: THEME.floor.envMapIntensity
+    });
+    this.materials.wall = new THREE.MeshStandardMaterial({
+      color: THEME.wall.color, roughness: THEME.wall.roughness,
+      metalness: THEME.wall.metalness, envMapIntensity: THEME.wall.envMapIntensity
+    });
+    this.materials.ceiling = new THREE.MeshStandardMaterial({
+      color: THEME.surfaceMid, roughness: 0.8, metalness: 0.1, envMapIntensity: 0.2
+    });
     // 展板：半透明玻璃数据屏（Slice 5 细化）
     this.materials.panel = new THREE.MeshPhysicalMaterial({
       color: 0x0a1628, roughness: 0.1, metalness: 0.0,

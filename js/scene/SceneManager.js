@@ -76,11 +76,39 @@ export class SceneManager {
   }
 
   /**
-   * 创建环境贴图 — 暂时禁用排查问题
+   * 创建环境贴图 — 亮色科技版
    */
   createEnvironment() {
-    // 暂时禁用环境贴图
-    console.log('环境贴图暂时禁用（排查）');
+    try {
+      const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+      pmremGenerator.compileEquirectangularShader();
+      const envScene = new THREE.Scene();
+      envScene.background = new THREE.Color(0x334466);
+      const panelGeo = new THREE.PlaneGeometry(10, 10);
+      const glow = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
+      const ice = new THREE.MeshBasicMaterial({ color: 0x0088ff });
+      const mid = new THREE.MeshBasicMaterial({ color: 0x446688 });
+      const faces = [
+        { mat: mid, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
+        { mat: mid, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
+        { mat: glow, pos: [0, 0, -5], rot: [0, 0, 0] },
+        { mat: glow, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
+        { mat: ice, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
+        { mat: ice, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
+      ];
+      faces.forEach(f => {
+        const m = new THREE.Mesh(panelGeo, f.mat);
+        m.position.set(...f.pos); m.rotation.set(...f.rot);
+        envScene.add(m);
+      });
+      const envTexture = pmremGenerator.fromScene(envScene).texture;
+      this.scene.environment = envTexture;
+      envScene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+      panelGeo.dispose(); pmremGenerator.dispose();
+      console.log('环境贴图生成完成');
+    } catch (e) {
+      console.error('环境贴图生成失败:', e);
+    }
   }
 
   /**
@@ -115,12 +143,26 @@ export class SceneManager {
   }
 
   /**
-   * 后处理：暂时禁用排查问题
+   * 后处理：Bloom（保守设置）
    */
   createPostProcessing() {
-    // 暂时禁用后处理，直接渲染
-    this.composer = null;
-    console.log('后处理暂时禁用（排查）');
+    try {
+      const size = new THREE.Vector2();
+      this.renderer.getSize(size);
+      this.composer = new EffectComposer(this.renderer);
+      this.composer.addPass(new RenderPass(this.scene, this.camera));
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(size.x, size.y),
+        THEME.bloom.strength,
+        THEME.bloom.radius,
+        THEME.bloom.threshold
+      );
+      this.composer.addPass(bloomPass);
+      console.log('后处理初始化完成');
+    } catch (e) {
+      console.error('后处理初始化失败:', e);
+      this.composer = null;
+    }
   }
 
   addObject(object) {
