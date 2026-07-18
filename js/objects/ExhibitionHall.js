@@ -113,7 +113,7 @@ export class ExhibitionHall {
       clipBias: 0.003,
       textureWidth: 512,
       textureHeight: 512,
-      color: THEME.bgDeep,
+      color: 0x334466,  // 亮蓝灰反射色调
     });
     this.floor.rotation.x = -Math.PI / 2;
     this.floor.position.y = 0;

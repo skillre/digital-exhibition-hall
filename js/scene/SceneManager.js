@@ -87,8 +87,7 @@ export class SceneManager {
     const panelGeo = new THREE.PlaneGeometry(10, 10);
     const glow = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
     const ice = new THREE.MeshBasicMaterial({ color: 0x0088ff });
-    const mid = new THREE.MeshBasicMaterial({ color: 0x2e4266 });
-    const bright = new THREE.MeshBasicMaterial({ color: 0x1a3050 });
+    const mid = new THREE.MeshBasicMaterial({ color: 0x446688 });
     const faces = [
       { mat: mid, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
       { mat: mid, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
