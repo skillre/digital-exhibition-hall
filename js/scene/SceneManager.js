@@ -8,7 +8,7 @@ import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass';
+// import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass';  // 暂时禁用，压暗场景
 
 export class SceneManager {
   /**
@@ -157,15 +157,14 @@ export class SceneManager {
     );
     this.composer.addPass(bloomPass);
 
-    // SSAO 环境光遮蔽通道（低强度，避免压暗场景）
-    const ssaoPass = new SSAOPass(this.scene, this.camera, size.x, size.y);
-    ssaoPass.kernelRadius = 4;
-    ssaoPass.minDistance = 0.005;
-    ssaoPass.maxDistance = 0.1;
-    ssaoPass.output = SSAOPass.OUTPUT.Default;
-    this.composer.addPass(ssaoPass);
+    // SSAO 暂时禁用（压暗场景）
+    // const ssaoPass = new SSAOPass(this.scene, this.camera, size.x, size.y);
+    // ssaoPass.kernelRadius = 4;
+    // ssaoPass.minDistance = 0.005;
+    // ssaoPass.maxDistance = 0.1;
+    // this.composer.addPass(ssaoPass);
 
-    console.log('后处理管线初始化完成');
+    console.log('后处理管线初始化完成 (SSAO 已禁用)');
   }
 
   /**
