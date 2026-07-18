@@ -62,11 +62,11 @@ export class ExhibitionHall {
     });
 
     this.materials.wall = new THREE.MeshBasicMaterial({
-      color: 0xf5f7fa
+      color: 0xaac0d4  // 浅冰蓝 — 明显能看出是蓝色，不刺眼
     });
 
     this.materials.ceiling = new THREE.MeshBasicMaterial({
-      color: 0xfafbfc
+      color: 0xc8d8e8  // 浅蓝白
     });
 
     // 踢脚线/顶线 — 蓝色
