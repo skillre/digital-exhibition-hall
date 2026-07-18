@@ -69,19 +69,12 @@ export class ExhibitionHall {
 
   initMaterials() {
     // 深色镜面地面材质（Reflector 主反射 + 叠加深色半透明）
-    this.materials.floor = new THREE.MeshStandardMaterial({
-      color: THEME.floor.color, roughness: THEME.floor.roughness,
-      metalness: THEME.floor.metalness, envMapIntensity: THEME.floor.envMapIntensity
-    });
-    // 墙面：暗锐蓝
-    this.materials.wall = new THREE.MeshStandardMaterial({
-      color: THEME.wall.color, roughness: THEME.wall.roughness,
-      metalness: THEME.wall.metalness, envMapIntensity: THEME.wall.envMapIntensity
-    });
-    // 天花板：暗色
-    this.materials.ceiling = new THREE.MeshStandardMaterial({
-      color: THEME.surfaceMid, roughness: 0.8, metalness: 0.1, envMapIntensity: 0.2
-    });
+    // 暂时用 MeshBasicMaterial 排查（不需要灯光/环境贴图）
+    this.materials.floor = new THREE.MeshBasicMaterial({ color: THEME.floor.color });
+    // 墙面
+    this.materials.wall = new THREE.MeshBasicMaterial({ color: THEME.wall.color });
+    // 天花板
+    this.materials.ceiling = new THREE.MeshBasicMaterial({ color: THEME.surfaceMid });
     // 展板：半透明玻璃数据屏（Slice 5 细化）
     this.materials.panel = new THREE.MeshPhysicalMaterial({
       color: 0x0a1628, roughness: 0.1, metalness: 0.0,
@@ -106,31 +99,14 @@ export class ExhibitionHall {
 
   createFloor() {
     const { width, depth } = this.config;
-    // 镜面反射地面
-    const reflectorGeo = new THREE.PlaneGeometry(width, depth);
-    this._geometries.push(reflectorGeo);
-    this.floor = new Reflector(reflectorGeo, {
-      clipBias: 0.003,
-      textureWidth: 512,
-      textureHeight: 512,
-      color: 0x334466,  // 亮蓝灰反射色调
-    });
+    // 暂时用简单平面替代 Reflector 排查问题
+    const floorGeo = new THREE.PlaneGeometry(width, depth);
+    this._geometries.push(floorGeo);
+    this.floor = new THREE.Mesh(floorGeo, this.materials.floor);
     this.floor.rotation.x = -Math.PI / 2;
     this.floor.position.y = 0;
+    this.floor.receiveShadow = true;
     this.scene.add(this.floor);
-    // 叠加半透明深色面（让反射可见但不过亮）
-    const overlayGeo = new THREE.PlaneGeometry(width, depth);
-    this._geometries.push(overlayGeo);
-    const overlayMat = new THREE.MeshStandardMaterial({
-      color: THEME.floor.color, roughness: 0.3, metalness: 0.6,
-      transparent: true, opacity: 0.2, envMapIntensity: 1.0
-    });
-    this._trackedMaterials.push(overlayMat);
-    const overlay = new THREE.Mesh(overlayGeo, overlayMat);
-    overlay.rotation.x = -Math.PI / 2;
-    overlay.position.y = 0.005;
-    overlay.receiveShadow = true;
-    this.scene.add(overlay);
     // 发光网格线
     const grid = new THREE.GridHelper(Math.max(width, depth), 40, THEME.neon, 0x182838);
     if (grid.material) {

@@ -76,38 +76,11 @@ export class SceneManager {
   }
 
   /**
-   * 创建暗色科技环境贴图 — 为金属/玻璃表面提供反射内容（深色底 + 青色高光面）
+   * 创建环境贴图 — 暂时禁用排查问题
    */
   createEnvironment() {
-    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
-    pmremGenerator.compileEquirectangularShader();
-    // 自建暗色科技环境场景
-    const envScene = new THREE.Scene();
-    envScene.background = new THREE.Color(THEME.bgDeep);
-    const panelGeo = new THREE.PlaneGeometry(10, 10);
-    const glow = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
-    const ice = new THREE.MeshBasicMaterial({ color: 0x0088ff });
-    const mid = new THREE.MeshBasicMaterial({ color: 0x446688 });
-    const faces = [
-      { mat: mid, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
-      { mat: mid, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
-      { mat: glow, pos: [0, 0, -5], rot: [0, 0, 0] },
-      { mat: glow, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
-      { mat: ice, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
-      { mat: ice, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
-    ];
-    faces.forEach(f => {
-      const m = new THREE.Mesh(panelGeo, f.mat);
-      m.position.set(...f.pos);
-      m.rotation.set(...f.rot);
-      envScene.add(m);
-    });
-    const envTexture = pmremGenerator.fromScene(envScene).texture;
-    this.scene.environment = envTexture;
-    envScene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
-    panelGeo.dispose();
-    pmremGenerator.dispose();
-    console.log('暗色科技环境贴图生成完成');
+    // 暂时禁用环境贴图
+    console.log('环境贴图暂时禁用（排查）');
   }
 
   /**
@@ -142,34 +115,12 @@ export class SceneManager {
   }
 
   /**
-   * 后处理：Bloom + 扫描线
+   * 后处理：暂时禁用排查问题
    */
   createPostProcessing() {
-    const size = new THREE.Vector2();
-    this.renderer.getSize(size);
-
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
-
-    const bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(size.x, size.y),
-      THEME.bloom.strength,   // 1.0
-      THEME.bloom.radius,    // 0.5
-      THEME.bloom.threshold  // 0.3
-    );
-    this.composer.addPass(bloomPass);
-
-    // 扫描线后处理 pass（D7 轻扫描线）
-    const ScanlineShader = {
-      uniforms: { tDiffuse: { value: null }, opacity: { value: 0.06 } },
-      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-      fragmentShader: `uniform sampler2D tDiffuse; uniform float opacity; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); float s = sin(vUv.y * 800.0) * 0.5 + 0.5; c.rgb -= s * opacity; gl_FragColor = c; }`,
-    };
-    const scanlinePass = new ShaderPass(ScanlineShader);
-    this.composer.addPass(scanlinePass);
-    this._scanlinePass = scanlinePass;
-
-    console.log('后处理管线初始化完成');
+    // 暂时禁用后处理，直接渲染
+    this.composer = null;
+    console.log('后处理暂时禁用（排查）');
   }
 
   addObject(object) {
