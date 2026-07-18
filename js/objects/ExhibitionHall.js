@@ -60,36 +60,52 @@ export class ExhibitionHall {
    * 初始化材质
    */
   initMaterials() {
+    // 地面：深色反光地板
     this.materials.floor = new THREE.MeshStandardMaterial({
-      color: 0x778899,
+      color: 0x1a1a2e,
+      roughness: 0.3,
+      metalness: 0.6
+    });
+
+    // 墙壁：带微光的深色墙面
+    this.materials.wall = new THREE.MeshStandardMaterial({
+      color: 0x2a2a3e,
       roughness: 0.6,
+      metalness: 0.3,
+      emissive: 0x111122,
+      emissiveIntensity: 0.1
+    });
+
+    // 天花板
+    this.materials.ceiling = new THREE.MeshStandardMaterial({
+      color: 0x1e1e32,
+      roughness: 0.8,
       metalness: 0.2
     });
 
-    this.materials.wall = new THREE.MeshStandardMaterial({
-      color: 0x8899aa,
-      roughness: 0.7,
-      metalness: 0.1
-    });
-
-    this.materials.ceiling = new THREE.MeshStandardMaterial({
-      color: 0x667788,
-      roughness: 0.8,
-      metalness: 0.1
-    });
-
+    // 展板：深色底板
     this.materials.panel = new THREE.MeshStandardMaterial({
-      color: 0x3a4a5a,
-      roughness: 0.5,
-      metalness: 0.3
+      color: 0x0d1117,
+      roughness: 0.4,
+      metalness: 0.5
     });
 
+    // 展板悬停：发光效果
     this.materials.panelHover = new THREE.MeshStandardMaterial({
-      color: 0x00d2ff,
+      color: 0x003355,
       roughness: 0.3,
       metalness: 0.5,
       emissive: 0x00d2ff,
-      emissiveIntensity: 0.2
+      emissiveIntensity: 0.4
+    });
+
+    // 墙壁边缘发光条
+    this.materials.edgeGlow = new THREE.MeshStandardMaterial({
+      color: 0x00d2ff,
+      emissive: 0x00d2ff,
+      emissiveIntensity: 0.8,
+      roughness: 0.2,
+      metalness: 0.8
     });
   }
 
@@ -111,16 +127,18 @@ export class ExhibitionHall {
   }
 
   /**
-   * 添加网格辅助线
+   * 添加网格辅助线（科技感发光网格）
    */
   addGridHelper(width, depth) {
     const gridHelper = new THREE.GridHelper(
       Math.max(width, depth),
-      Math.max(width, depth) / 2,
-      0x444455,
-      0x333344
+      20,
+      0x004466,
+      0x002233
     );
-    gridHelper.position.y = 0.01;
+    gridHelper.position.y = 0.02;
+    gridHelper.material.opacity = 0.6;
+    gridHelper.material.transparent = true;
     this.scene.add(gridHelper);
   }
 
@@ -141,6 +159,32 @@ export class ExhibitionHall {
     wallConfigs.forEach(config => {
       const wall = this.createWall(config);
       this.walls.push(wall);
+    });
+
+    // 墙壁底部发光条
+    this.createWallEdgeStrips(wallConfigs);
+  }
+
+  /**
+   * 创建墙壁底部发光条
+   */
+  createWallEdgeStrips(wallConfigs) {
+    wallConfigs.forEach(config => {
+      const { size, position } = config;
+      const stripWidth = Math.max(size[0], size[2]);
+      const stripGeometry = new THREE.BoxGeometry(stripWidth, 0.08, 0.05);
+      this._geometries.push(stripGeometry);
+
+      const strip = new THREE.Mesh(stripGeometry, this.materials.edgeGlow);
+      if (size[2] < size[0]) {
+        // 前后墙
+        strip.position.set(position[0], 0.04, position[2]);
+      } else {
+        // 左右墙
+        strip.position.set(position[0], 0.04, position[2]);
+        strip.rotation.y = Math.PI / 2;
+      }
+      this.scene.add(strip);
     });
   }
 
@@ -198,10 +242,10 @@ export class ExhibitionHall {
 
     const doorFrameMaterial = new THREE.MeshStandardMaterial({
       color: 0x00d2ff,
-      roughness: 0.3,
-      metalness: 0.7,
+      roughness: 0.2,
+      metalness: 0.8,
       emissive: 0x00d2ff,
-      emissiveIntensity: 0.1
+      emissiveIntensity: 0.6
     });
 
     const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
@@ -294,7 +338,7 @@ export class ExhibitionHall {
     ];
 
     lightPositions.forEach(pos => {
-      const light = new THREE.PointLight(0x00d2ff, 0.5, 15);
+      const light = new THREE.PointLight(0x00d2ff, 1.5, 20);
       light.position.set(pos.x, pos.y, pos.z);
       this.scene.add(light);
 
@@ -304,7 +348,7 @@ export class ExhibitionHall {
       const lightMaterial = new THREE.MeshStandardMaterial({
         color: 0x00d2ff,
         emissive: 0x00d2ff,
-        emissiveIntensity: 1
+        emissiveIntensity: 2
       });
 
       const lightMesh = new THREE.Mesh(lightGeometry, lightMaterial);
