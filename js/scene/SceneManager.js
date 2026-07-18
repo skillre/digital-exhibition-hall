@@ -83,11 +83,11 @@ export class SceneManager {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x888888);
+      envScene.background = new THREE.Color(0x3a4a60);
       const panelGeo = new THREE.PlaneGeometry(10, 10);
-      const bright = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const mid = new THREE.MeshBasicMaterial({ color: 0x888888 });
-      const floor = new THREE.MeshBasicMaterial({ color: 0x1a1e22 });
+      const bright = new THREE.MeshBasicMaterial({ color: 0x8ab4d4 });
+      const mid = new THREE.MeshBasicMaterial({ color: 0x3a4a60 });
+      const floor = new THREE.MeshBasicMaterial({ color: 0x0c1a30 });
       const faces = [
         { mat: floor, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
         { mat: bright, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },

@@ -58,23 +58,23 @@ export class ExhibitionHall {
   initMaterials() {
     // 纯色材质（不用程序纹理，确保颜色可见）
     this.materials.floor = new THREE.MeshStandardMaterial({
-      color: 0x1a1e28, roughness: 0.2, metalness: 0.4, envMapIntensity: 0.6
+      color: 0xd8dce0, roughness: 0.1, metalness: 0.7, envMapIntensity: 1.0
     });
 
     this.materials.wall = new THREE.MeshBasicMaterial({
-      color: 0xe0e4ea
+      color: 0xe8eaee
     });
 
     this.materials.ceiling = new THREE.MeshBasicMaterial({
-      color: 0xe8eef4
+      color: 0x1a1a20
     });
 
     // 踢脚线/顶线 — 深蓝色（地面反射效果）
-    this.materials.baseboard = new THREE.MeshStandardMaterial({
-      color: 0x0c2040, roughness: 0.3, metalness: 0.5
+    this.materials.baseboard = new THREE.MeshBasicMaterial({
+      color: 0x0a1a30
     });
-    this.materials.trim = new THREE.MeshStandardMaterial({
-      color: 0x0c2040, roughness: 0.3, metalness: 0.5
+    this.materials.trim = new THREE.MeshBasicMaterial({
+      color: 0x0a1a30
     });
 
     // 展板：半透明玻璃数据屏（数字化元素）
@@ -189,14 +189,15 @@ export class ExhibitionHall {
       const panelD = isLongX ? 0.02 : (len / panelCount) * 0.55;
       const panelGeo = new THREE.BoxGeometry(panelW, panelH, panelD);
       this._geometries.push(panelGeo);
-      const panelMat = new THREE.MeshStandardMaterial({ color: 0xe8e8ec, roughness: 0.7, metalness: 0.1 });
+      const panelMat = new THREE.MeshBasicMaterial({ color: 0x0a2040 });
       this._trackedMaterials.push(panelMat);
       const panel = new THREE.Mesh(panelGeo, panelMat);
       panel.position.set(px, size[1] * 0.5, pz);
       this.scene.add(panel);
+      // 白色LED发光边框
       const borderGeo = new THREE.EdgesGeometry(panelGeo);
       this._geometries.push(borderGeo);
-      const borderMat = new THREE.LineBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.35 });
+      const borderMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
       this._trackedMaterials.push(borderMat);
       const border = new THREE.LineSegments(borderGeo, borderMat);
       border.position.copy(panel.position);
@@ -220,14 +221,14 @@ export class ExhibitionHall {
     const rows = [-depth / 4, 0, depth / 4];
     const cols = [-width / 4, 0, width / 4];
     rows.forEach(z => cols.forEach(x => {
-      // 简洁的白色灯带
-      const barGeo = new THREE.BoxGeometry(2.5, 0.03, 0.2);
+      // 白色LED灯带（在深色天花板上）
+      const barGeo = new THREE.BoxGeometry(2.5, 0.02, 0.15);
       this._geometries.push(barGeo);
-      const barMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const barMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.9 });
       this._trackedMaterials.push(barMat);
       this._ceilingBars.push(barMat);
       const bar = new THREE.Mesh(barGeo, barMat);
-      bar.position.set(x, height - 0.06, z);
+      bar.position.set(x, height - 0.03, z);
       this.scene.add(bar);
     }));
   }
@@ -242,7 +243,7 @@ export class ExhibitionHall {
 
   createEntrance() {
     const { width, height, depth } = this.config;
-    const frameMat = new THREE.MeshBasicMaterial({ color: 0xd0d4d8 });
+    const frameMat = new THREE.MeshBasicMaterial({ color: 0x7aa8c8 });
     const pillarGeo = new THREE.BoxGeometry(0.18, height, 0.3);
     this._geometries.push(pillarGeo);
     const lp = new THREE.Mesh(pillarGeo, frameMat);
@@ -268,32 +269,20 @@ export class ExhibitionHall {
 
   createFloorAccents() {
     const { width, depth } = this.config;
-    // 蓝色LED边线
-    const blueMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.6 });
-    this._trackedMaterials.push(blueMat);
+    // 白色LED边线
+    const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+    this._trackedMaterials.push(whiteMat);
     const wallDist = 0.25;
     [
-      { x: 0, z: -depth/2 + wallDist, sx: width, sz: 0.04 },
-      { x: 0, z: depth/2 - wallDist, sx: width, sz: 0.04 },
-      { x: -width/2 + wallDist, z: 0, sx: 0.04, sz: depth },
-      { x: width/2 - wallDist, z: 0, sx: 0.04, sz: depth },
+      { x: 0, z: -depth/2 + wallDist, sx: width, sz: 0.03 },
+      { x: 0, z: depth/2 - wallDist, sx: width, sz: 0.03 },
+      { x: -width/2 + wallDist, z: 0, sx: 0.03, sz: depth },
+      { x: width/2 - wallDist, z: 0, sx: 0.03, sz: depth },
     ].forEach(({ x, z, sx, sz }) => {
-      const geo = new THREE.BoxGeometry(sx, 0.02, sz);
+      const geo = new THREE.BoxGeometry(sx, 0.015, sz);
       this._geometries.push(geo);
-      const line = new THREE.Mesh(geo, blueMat);
-      line.position.set(x, 0.01, z);
-      this.scene.add(line);
-    });
-    // 中心十字线
-    const centerMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.25 });
-    this._trackedMaterials.push(centerMat);
-    [{ sx: 0.03, sz: depth, px: 0, pz: 0 },
-     { sx: width, sz: 0.03, px: 0, pz: 0 }
-    ].forEach(({ sx, sz, px, pz }) => {
-      const geo = new THREE.BoxGeometry(sx, 0.01, sz);
-      this._geometries.push(geo);
-      const line = new THREE.Mesh(geo, centerMat);
-      line.position.set(px, 0.005, pz);
+      const line = new THREE.Mesh(geo, whiteMat);
+      line.position.set(x, 0.008, z);
       this.scene.add(line);
     });
   }
