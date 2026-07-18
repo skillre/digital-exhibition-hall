@@ -94,7 +94,7 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.5;
+    this.renderer.toneMappingExposure = 2.0;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
@@ -131,7 +131,7 @@ export class SceneManager {
     this.scene.add(directionalLight);
 
     // 半球光
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x888888, 0.6);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x666688, 0.8);
     this.scene.add(hemisphereLight);
   }
 

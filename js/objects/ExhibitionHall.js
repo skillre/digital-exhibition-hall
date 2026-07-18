@@ -62,30 +62,30 @@ export class ExhibitionHall {
   initMaterials() {
     // 地面：深色反光地板
     this.materials.floor = new THREE.MeshStandardMaterial({
-      color: 0x1a1a2e,
+      color: 0x2a2a3e,
       roughness: 0.3,
-      metalness: 0.6
+      metalness: 0.5
     });
 
     // 墙壁：带微光的深色墙面
     this.materials.wall = new THREE.MeshStandardMaterial({
-      color: 0x2a2a3e,
+      color: 0x3a3a4e,
       roughness: 0.6,
       metalness: 0.3,
-      emissive: 0x111122,
-      emissiveIntensity: 0.1
+      emissive: 0x1a1a30,
+      emissiveIntensity: 0.15
     });
 
     // 天花板
     this.materials.ceiling = new THREE.MeshStandardMaterial({
-      color: 0x1e1e32,
-      roughness: 0.8,
+      color: 0x2e2e42,
+      roughness: 0.7,
       metalness: 0.2
     });
 
     // 展板：深色底板
     this.materials.panel = new THREE.MeshStandardMaterial({
-      color: 0x0d1117,
+      color: 0x1a1a2e,
       roughness: 0.4,
       metalness: 0.5
     });

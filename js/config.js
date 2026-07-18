@@ -6,12 +6,12 @@
 export const CONFIG = {
   // 场景配置
   scene: {
-    backgroundColor: 0x0a0a1a,
+    backgroundColor: 0x111827,
     fog: {
       enabled: true,
-      color: 0x0a0a1a,
-      near: 20,
-      far: 80
+      color: 0x111827,
+      near: 15,
+      far: 60
     }
   },
 
@@ -27,11 +27,11 @@ export const CONFIG = {
   lighting: {
     ambient: {
       color: 0xffffff,
-      intensity: 1.0
+      intensity: 1.5
     },
     directional: {
       color: 0xffffff,
-      intensity: 1.5,
+      intensity: 2.0,
       position: { x: 5, y: 10, z: 5 }
     }
   },
