@@ -232,22 +232,22 @@ export class ExhibitionHall {
 
   createCeilingLights() {
     const { width, height, depth } = this.config;
-    const lightColor = THEME.neon;
+    const lightColor = 0xfff8ee;  // 白色日光灯
     const rows = [-depth / 4, 0, depth / 4];
     const cols = [-width / 4, 0, width / 4];
     rows.forEach(z => cols.forEach(x => {
       const barGeo = new THREE.BoxGeometry(2.5, 0.04, 0.25);
       this._geometries.push(barGeo);
       const barMat = new THREE.MeshStandardMaterial({
-        color: 0xffffff, emissive: lightColor, emissiveIntensity: 2.0,
+        color: 0xffffff, emissive: lightColor, emissiveIntensity: 1.5,
         roughness: 0.1, metalness: 0.0
       });
       this._trackedMaterials.push(barMat);
-      this._ceilingBars.push(barMat);  // 供 Slice 6 灯带呼吸动效引用
+      this._ceilingBars.push(barMat);
       const bar = new THREE.Mesh(barGeo, barMat);
       bar.position.set(x, height - 0.08, z);
       this.scene.add(bar);
-      const light = new THREE.PointLight(lightColor, 0.5, 12);
+      const light = new THREE.PointLight(lightColor, 0.4, 12);
       light.position.set(x, height - 0.3, z);
       this.scene.add(light);
     }));

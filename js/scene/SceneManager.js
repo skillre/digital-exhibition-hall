@@ -83,18 +83,18 @@ export class SceneManager {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x2a3a55);
+      envScene.background = new THREE.Color(0x3a3a3e);
       const panelGeo = new THREE.PlaneGeometry(10, 10);
       const glow = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
-      const ice = new THREE.MeshBasicMaterial({ color: 0x0088ff });
-      const mid = new THREE.MeshBasicMaterial({ color: 0x446688 });
+      const white = new THREE.MeshBasicMaterial({ color: 0xddd8cc });
+      const mid = new THREE.MeshBasicMaterial({ color: 0x3a3a3e });
       const faces = [
         { mat: mid, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
-        { mat: mid, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
+        { mat: white, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
         { mat: glow, pos: [0, 0, -5], rot: [0, 0, 0] },
-        { mat: glow, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
-        { mat: ice, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
-        { mat: ice, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
+        { mat: mid, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
+        { mat: white, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
+        { mat: white, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
       ];
       faces.forEach(f => {
         const m = new THREE.Mesh(panelGeo, f.mat);
@@ -141,12 +141,12 @@ export class SceneManager {
     accent.position.set(0, 6, 0);
     this.scene.add(accent);
 
-    // 暖色补光 — 增加自然感
-    const warmFill = new THREE.PointLight(0xffeedd, 0.6, 25);
-    warmFill.position.set(-8, 4, 5);
+    // 暖色补光 — 白色日光灯风格
+    const warmFill = new THREE.PointLight(0xfff8f0, 0.8, 25);
+    warmFill.position.set(-8, 6, 5);
     this.scene.add(warmFill);
-    const warmFill2 = new THREE.PointLight(0xffeedd, 0.4, 20);
-    warmFill2.position.set(8, 4, -5);
+    const warmFill2 = new THREE.PointLight(0xfff8f0, 0.6, 20);
+    warmFill2.position.set(8, 6, -5);
     this.scene.add(warmFill2);
   }
 

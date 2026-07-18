@@ -3,31 +3,31 @@
  * 视觉风格：深蓝赛博 Cyber Blue
  */
 
-// 视觉设计令牌 — 深蓝赛博（单一来源，JS 侧；CSS 侧见 css/style.css :root）
+// 视觉设计令牌 — 真实展厅 + 数字点缀
 export const THEME = {
-  // 基调
-  bgDeep: 0x0c1828,        // 深蓝黑 — 背景/雾
-  surfaceDark: 0x2a4468,   // 墙面（中等暗蓝）
-  surfaceMid: 0x305070,    // 天花
-  // 强调
+  // 基调 — 真实展厅色
+  bgDeep: 0x0c1420,        // 深色背景
+  surfaceDark: 0x2a2a30,   // 墙面（真实灰调）
+  surfaceMid: 0x222228,    // 天花板
+  // 强调 — 数字化点缀
   neon: 0x00d2ff,          // 青色霓虹
   ice: 0x0088ff,           // 冰蓝
   // 点缀
   safe: 0x00ff88,          // 翠绿
   threat: 0xff00aa,        // 品红
-  // 材质参数 — 低 metalness 让灯光穿透
-  floor: { color: 0x253a58, roughness: 0.25, metalness: 0.3, envMapIntensity: 1.5 },
-  wall: { color: 0x2a4468, roughness: 0.5, metalness: 0.1, envMapIntensity: 0.8 },
+  // 材质参数 — 真实质感（低 metalness）
+  floor: { color: 0x1e1e24, roughness: 0.2, metalness: 0.1, envMapIntensity: 0.8 },
+  wall: { color: 0x2a2a30, roughness: 0.7, metalness: 0.05, envMapIntensity: 0.3 },
   panel: { color: 0x0a1628, emissive: 0x00d2ff, emissiveIntensity: 0.6 },
-  // 灯光 — 冷暖混合，更自然的 VR 感
-  ambient: { color: 0x8899bb, intensity: 1.2 },
-  directional: { color: 0xccddee, intensity: 1.8 },
-  hemisphere: { sky: 0x8899aa, ground: 0x253a58, intensity: 0.8 },
-  accent: { color: 0x00d2ff, intensity: 2.5 },
+  // 灯光 — 白色日光灯（真实展厅感）
+  ambient: { color: 0xe8e4dd, intensity: 0.6 },
+  directional: { color: 0xffffff, intensity: 1.2 },
+  hemisphere: { sky: 0xf0eee8, ground: 0x1e1e24, intensity: 0.5 },
+  accent: { color: 0x00d2ff, intensity: 1.5 },
   // 雾
-  fog: { color: 0x0c1828, density: 0.003 },
+  fog: { color: 0x0c1420, density: 0.003 },
   // 后处理
-  bloom: { strength: 0.4, radius: 0.3, threshold: 0.8 },
+  bloom: { strength: 0.6, radius: 0.4, threshold: 0.6 },
 };
 
 // 全局配置
