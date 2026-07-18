@@ -83,7 +83,7 @@ export class SceneManager {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x334466);
+      envScene.background = new THREE.Color(0x2a3a55);
       const panelGeo = new THREE.PlaneGeometry(10, 10);
       const glow = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
       const ice = new THREE.MeshBasicMaterial({ color: 0x0088ff });
@@ -143,7 +143,7 @@ export class SceneManager {
   }
 
   /**
-   * 后处理：Bloom（保守设置）
+   * 后处理：Bloom + 扫描线
    */
   createPostProcessing() {
     try {
@@ -158,6 +158,13 @@ export class SceneManager {
         THEME.bloom.threshold
       );
       this.composer.addPass(bloomPass);
+      // 轻扫描线
+      const ScanlineShader = {
+        uniforms: { tDiffuse: { value: null }, opacity: { value: 0.04 } },
+        vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+        fragmentShader: `uniform sampler2D tDiffuse; uniform float opacity; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); float s = sin(vUv.y * 800.0) * 0.5 + 0.5; c.rgb -= s * opacity; gl_FragColor = c; }`,
+      };
+      this.composer.addPass(new ShaderPass(ScanlineShader));
       console.log('后处理初始化完成');
     } catch (e) {
       console.error('后处理初始化失败:', e);

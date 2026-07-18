@@ -105,16 +105,33 @@ export class ExhibitionHall {
 
   createFloor() {
     const { width, depth } = this.config;
-    // 暂时用简单平面替代 Reflector 排查问题
-    const floorGeo = new THREE.PlaneGeometry(width, depth);
-    this._geometries.push(floorGeo);
-    this.floor = new THREE.Mesh(floorGeo, this.materials.floor);
+    // 镜面反射地面
+    const reflectorGeo = new THREE.PlaneGeometry(width, depth);
+    this._geometries.push(reflectorGeo);
+    this.floor = new Reflector(reflectorGeo, {
+      clipBias: 0.003,
+      textureWidth: 512,
+      textureHeight: 512,
+      color: 0x2a3a55,  // 反射色调 — 不能太暗
+    });
     this.floor.rotation.x = -Math.PI / 2;
     this.floor.position.y = 0;
-    this.floor.receiveShadow = true;
     this.scene.add(this.floor);
+    // 半透明叠加层（让反射柔和但可见）
+    const overlayGeo = new THREE.PlaneGeometry(width, depth);
+    this._geometries.push(overlayGeo);
+    const overlayMat = new THREE.MeshStandardMaterial({
+      color: THEME.floor.color, roughness: 0.3, metalness: 0.5,
+      transparent: true, opacity: 0.15, envMapIntensity: 1.0
+    });
+    this._trackedMaterials.push(overlayMat);
+    const overlay = new THREE.Mesh(overlayGeo, overlayMat);
+    overlay.rotation.x = -Math.PI / 2;
+    overlay.position.y = 0.005;
+    overlay.receiveShadow = true;
+    this.scene.add(overlay);
     // 发光网格线
-    const grid = new THREE.GridHelper(Math.max(width, depth), 40, THEME.neon, 0x182838);
+    const grid = new THREE.GridHelper(Math.max(width, depth), 40, THEME.neon, 0x152030);
     if (grid.material) {
       if (Array.isArray(grid.material)) grid.material.forEach(m => { m.transparent = true; m.opacity = 0.35; });
       else { grid.material.transparent = true; grid.material.opacity = 0.35; }
