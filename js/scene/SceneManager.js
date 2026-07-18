@@ -71,7 +71,7 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.4;
+    this.renderer.toneMappingExposure = 1.2;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
@@ -85,9 +85,9 @@ export class SceneManager {
     const envScene = new THREE.Scene();
     envScene.background = new THREE.Color(THEME.bgDeep);
     const panelGeo = new THREE.PlaneGeometry(10, 10);
-    const glow = new THREE.MeshBasicMaterial({ color: 0x00e8ff });
-    const ice = new THREE.MeshBasicMaterial({ color: 0x2288ff });
-    const mid = new THREE.MeshBasicMaterial({ color: 0x1a2a44 });
+    const glow = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
+    const ice = new THREE.MeshBasicMaterial({ color: 0x0088ff });
+    const mid = new THREE.MeshBasicMaterial({ color: 0x223355 });
     const faces = [
       { mat: mid, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
       { mat: mid, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },

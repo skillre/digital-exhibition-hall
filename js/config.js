@@ -6,28 +6,28 @@
 // 视觉设计令牌 — 深蓝赛博（单一来源，JS 侧；CSS 侧见 css/style.css :root）
 export const THEME = {
   // 基调
-  bgDeep: 0x080e1a,        // 深蓝黑 — 背景/雾（略提亮）
-  surfaceDark: 0x141e30,   // 暗锐蓝 — 墙面（提亮）
-  surfaceMid: 0x1a2438,    // 中间面 — 天花/展板底（提亮）
+  bgDeep: 0x0a1628,        // 深蓝黑 — 背景/雾
+  surfaceDark: 0x1a2a48,   // 暗锐蓝 — 墙面
+  surfaceMid: 0x223350,    // 中间面 — 天花/展板底
   // 强调
   neon: 0x00d2ff,          // 青色霓虹 — 灯带/线框/数据点
-  ice: 0x0066ff,           // 冰蓝 — 全息投影
+  ice: 0x0088ff,           // 冰蓝 — 全息投影
   // 点缀
   safe: 0x00ff88,          // 翠绿 — 安全状态
   threat: 0xff00aa,        // 品红 — 威胁/告警
   // 材质参数
-  floor: { color: 0x0c1424, roughness: 0.05, metalness: 0.95, envMapIntensity: 1.0 },
-  wall: { color: 0x141e30, roughness: 0.5, metalness: 0.25, envMapIntensity: 0.5 },
+  floor: { color: 0x1a2a40, roughness: 0.15, metalness: 0.85, envMapIntensity: 1.2 },
+  wall: { color: 0x1e2e48, roughness: 0.55, metalness: 0.2, envMapIntensity: 0.6 },
   panel: { color: 0x0a1628, emissive: 0x00d2ff, emissiveIntensity: 0.6 },
   // 灯光
-  ambient: { color: 0x1a2a4e, intensity: 0.45 },
-  directional: { color: 0x4488cc, intensity: 0.6 },
-  hemisphere: { sky: 0x00d2ff, ground: 0x0c1424, intensity: 0.5 },
-  accent: { color: 0x00d2ff, intensity: 1.2 },
+  ambient: { color: 0x4466aa, intensity: 0.8 },
+  directional: { color: 0x88aadd, intensity: 1.0 },
+  hemisphere: { sky: 0x4488cc, ground: 0x1a2a40, intensity: 0.6 },
+  accent: { color: 0x00d2ff, intensity: 2.0 },
   // 雾
-  fog: { color: 0x080e1a, density: 0.008 },
+  fog: { color: 0x0a1628, density: 0.006 },
   // 后处理
-  bloom: { strength: 0.8, radius: 0.4, threshold: 0.5 },
+  bloom: { strength: 0.6, radius: 0.4, threshold: 0.6 },
 };
 
 // 全局配置

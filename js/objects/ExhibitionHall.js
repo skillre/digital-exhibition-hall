@@ -132,7 +132,7 @@ export class ExhibitionHall {
     overlay.receiveShadow = true;
     this.scene.add(overlay);
     // 发光网格线
-    const grid = new THREE.GridHelper(Math.max(width, depth), 40, THEME.neon, 0x0a1a2e);
+    const grid = new THREE.GridHelper(Math.max(width, depth), 40, THEME.neon, 0x101a2a);
     if (grid.material) {
       if (Array.isArray(grid.material)) grid.material.forEach(m => { m.transparent = true; m.opacity = 0.35; });
       else { grid.material.transparent = true; grid.material.opacity = 0.35; }
