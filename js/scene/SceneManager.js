@@ -83,18 +83,18 @@ export class SceneManager {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x3a3a3e);
+      envScene.background = new THREE.Color(0x807870);
       const panelGeo = new THREE.PlaneGeometry(10, 10);
-      const glow = new THREE.MeshBasicMaterial({ color: 0x00d2ff });
-      const white = new THREE.MeshBasicMaterial({ color: 0xddd8cc });
-      const mid = new THREE.MeshBasicMaterial({ color: 0x3a3a3e });
+      const bright = new THREE.MeshBasicMaterial({ color: 0xf0ede8 });
+      const mid = new THREE.MeshBasicMaterial({ color: 0x807870 });
+      const floor = new THREE.MeshBasicMaterial({ color: 0x3a3830 });
       const faces = [
-        { mat: mid, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
-        { mat: white, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
-        { mat: glow, pos: [0, 0, -5], rot: [0, 0, 0] },
-        { mat: mid, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
-        { mat: white, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
-        { mat: white, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
+        { mat: floor, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
+        { mat: bright, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
+        { mat: bright, pos: [0, 0, -5], rot: [0, 0, 0] },
+        { mat: bright, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
+        { mat: mid, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
+        { mat: mid, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
       ];
       faces.forEach(f => {
         const m = new THREE.Mesh(panelGeo, f.mat);

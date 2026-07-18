@@ -1,33 +1,33 @@
 /**
  * 应用配置和状态
- * 视觉风格：深蓝赛博 Cyber Blue
+ * 视觉风格：真实展厅 + 数字叠加
  */
 
-// 视觉设计令牌 — 真实展厅 + 数字点缀
+// 视觉设计令牌
 export const THEME = {
-  // 基调 — 真实展厅色
-  bgDeep: 0x0c1420,        // 深色背景
-  surfaceDark: 0x2a2a30,   // 墙面（真实灰调）
-  surfaceMid: 0x222228,    // 天花板
-  // 强调 — 数字化点缀
+  // 基调 — 真实展厅色彩
+  bgDeep: 0x1a1a1e,        // 暖灰深色 — 远景/雾
+  surfaceDark: 0xd8d4cc,   // 暖白墙面
+  surfaceMid: 0xf0ede8,    // 白色天花板
+  // 强调 — 数字化点缀（仅用于展板/粒子/HUD）
   neon: 0x00d2ff,          // 青色霓虹
   ice: 0x0088ff,           // 冰蓝
   // 点缀
-  safe: 0x00ff88,          // 翠绿
-  threat: 0xff00aa,        // 品红
-  // 材质参数 — 真实质感（低 metalness）
-  floor: { color: 0x1e1e24, roughness: 0.2, metalness: 0.1, envMapIntensity: 0.8 },
-  wall: { color: 0x2a2a30, roughness: 0.7, metalness: 0.05, envMapIntensity: 0.3 },
+  safe: 0x00ff88,
+  threat: 0xff00aa,
+  // 材质参数 — 真实质感
+  floor: { color: 0x2a2820, roughness: 0.15, metalness: 0.05, envMapIntensity: 0.6 },
+  wall: { color: 0xd8d4cc, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.2 },
   panel: { color: 0x0a1628, emissive: 0x00d2ff, emissiveIntensity: 0.6 },
-  // 灯光 — 白色日光灯（真实展厅感）
-  ambient: { color: 0xe8e4dd, intensity: 0.6 },
-  directional: { color: 0xffffff, intensity: 1.2 },
-  hemisphere: { sky: 0xf0eee8, ground: 0x1e1e24, intensity: 0.5 },
+  // 灯光 — 白色日光灯（真实展厅照明）
+  ambient: { color: 0xf0ece4, intensity: 0.7 },
+  directional: { color: 0xffffff, intensity: 1.0 },
+  hemisphere: { sky: 0xf5f2ee, ground: 0x2a2820, intensity: 0.5 },
   accent: { color: 0x00d2ff, intensity: 1.5 },
   // 雾
-  fog: { color: 0x0c1420, density: 0.003 },
-  // 后处理
-  bloom: { strength: 0.6, radius: 0.4, threshold: 0.6 },
+  fog: { color: 0x1a1a1e, density: 0.002 },
+  // 后处理 — 轻微 Bloom 只让数字元素发光
+  bloom: { strength: 0.4, radius: 0.3, threshold: 0.75 },
 };
 
 // 全局配置
@@ -36,10 +36,10 @@ export const CONFIG = {
     backgroundColor: THEME.bgDeep,
     fog: {
       enabled: true,
-      type: 'exp2',         // SceneManager 用 FogExp2
+      type: 'exp2',
       color: THEME.fog.color,
       density: THEME.fog.density,
-      near: 35, far: 80,    // 线性雾回退兼容
+      near: 35, far: 80,
     },
   },
 
