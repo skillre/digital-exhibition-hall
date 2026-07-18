@@ -123,7 +123,7 @@ export class ExhibitionHall {
     this._geometries.push(overlayGeo);
     const overlayMat = new THREE.MeshStandardMaterial({
       color: THEME.floor.color, roughness: 0.3, metalness: 0.6,
-      transparent: true, opacity: 0.35, envMapIntensity: 0.8
+      transparent: true, opacity: 0.2, envMapIntensity: 1.0
     });
     this._trackedMaterials.push(overlayMat);
     const overlay = new THREE.Mesh(overlayGeo, overlayMat);
@@ -132,7 +132,7 @@ export class ExhibitionHall {
     overlay.receiveShadow = true;
     this.scene.add(overlay);
     // 发光网格线
-    const grid = new THREE.GridHelper(Math.max(width, depth), 40, THEME.neon, 0x101a2a);
+    const grid = new THREE.GridHelper(Math.max(width, depth), 40, THEME.neon, 0x182838);
     if (grid.material) {
       if (Array.isArray(grid.material)) grid.material.forEach(m => { m.transparent = true; m.opacity = 0.35; });
       else { grid.material.transparent = true; grid.material.opacity = 0.35; }
