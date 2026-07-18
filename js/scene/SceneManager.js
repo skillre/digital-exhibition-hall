@@ -131,7 +131,7 @@ export class SceneManager {
     this.scene.add(directionalLight);
 
     // 半球光
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.3);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x888888, 0.6);
     this.scene.add(hemisphereLight);
   }
 
@@ -159,7 +159,7 @@ export class SceneManager {
 
     // SSAO 环境光遮蔽通道
     const ssaoPass = new SSAOPass(this.scene, this.camera, size.x, size.y);
-    ssaoPass.kernelRadius = 16;
+    ssaoPass.kernelRadius = 8;
     ssaoPass.minDistance = 0.005;
     ssaoPass.maxDistance = 0.1;
     this.composer.addPass(ssaoPass);

@@ -27,11 +27,11 @@ export const CONFIG = {
   lighting: {
     ambient: {
       color: 0xffffff,
-      intensity: 0.4
+      intensity: 0.8
     },
     directional: {
       color: 0xffffff,
-      intensity: 0.8,
+      intensity: 1.2,
       position: { x: 5, y: 10, z: 5 }
     }
   },
