@@ -56,73 +56,20 @@ export class ExhibitionHall {
   // ===== 真实材质 =====
 
   initMaterials() {
-    // 地面：深蓝科技石材
-    const floorTex = this.createProceduralTexture(1024, 1024, (ctx, w, h) => {
-      const bg = ctx.createLinearGradient(0, 0, w, h);
-      bg.addColorStop(0, '#0e1e38'); bg.addColorStop(1, '#0c1a30');
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-      // 蓝色科技纹路
-      for (let i = 0; i < 80; i++) {
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(20,50,100,${0.08 + Math.random() * 0.15})`;
-        ctx.lineWidth = 0.5 + Math.random() * 2;
-        let x = Math.random() * w, y = Math.random() * h;
-        ctx.moveTo(x, y);
-        for (let j = 0; j < 8; j++) { x += (Math.random() - 0.5) * 150; y += (Math.random() - 0.5) * 150; ctx.lineTo(x, y); }
-        ctx.stroke();
-      }
-      // 细微数据线纹理
-      ctx.strokeStyle = 'rgba(0,120,200,0.04)'; ctx.lineWidth = 1;
-      for (let i = 0; i < 20; i++) {
-        ctx.beginPath();
-        let x = Math.random() * w, y = Math.random() * h;
-        ctx.moveTo(x, y);
-        for (let j = 0; j < 10; j++) { x += (Math.random() - 0.5) * 80; y += (Math.random() - 0.5) * 80; ctx.lineTo(x, y); }
-        ctx.stroke();
-      }
-      // 缝隙线
-      ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 2;
-      const tileSize = w / 4;
-      for (let x = 0; x <= w; x += tileSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-      for (let y = 0; y <= h; y += tileSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-    });
-    floorTex.repeat.set(4, 4);
+    // 纯色材质（不用程序纹理，确保颜色可见）
     this.materials.floor = new THREE.MeshStandardMaterial({
-      map: floorTex, color: 0xffffff, roughness: 0.15,
-      metalness: 0.15, envMapIntensity: 0.8,
+      color: 0x0c1a30, roughness: 0.2, metalness: 0.3, envMapIntensity: 0.8
     });
 
-    // 墙面：纯白
-    const wallTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
-      ctx.fillStyle = '#f0f4f8'; ctx.fillRect(0, 0, w, h);
-      for (let i = 0; i < 2000; i++) {
-        const px = Math.random() * w, py = Math.random() * h;
-        const v = 235 + Math.random() * 15;
-        ctx.fillStyle = `rgba(${v},${v + 2},${v + 5},${0.05 + Math.random() * 0.08})`;
-        ctx.fillRect(px, py, 1, 1);
-      }
-    });
-    wallTex.repeat.set(2, 1);
     this.materials.wall = new THREE.MeshStandardMaterial({
-      map: wallTex, color: 0xffffff, roughness: 0.9,
-      metalness: 0.0, envMapIntensity: 0.15,
+      color: 0xf0f4f8, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.15
     });
 
-    // 天花板：纯白
-    const ceilTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
-      ctx.fillStyle = '#f8faff'; ctx.fillRect(0, 0, w, h);
-      ctx.strokeStyle = 'rgba(200,210,220,0.25)'; ctx.lineWidth = 2;
-      const tileSize = w / 4;
-      for (let x = 0; x <= w; x += tileSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-      for (let y = 0; y <= h; y += tileSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-    });
-    ceilTex.repeat.set(4, 4);
     this.materials.ceiling = new THREE.MeshStandardMaterial({
-      map: ceilTex, color: 0xffffff, roughness: 0.85,
-      metalness: 0.0, envMapIntensity: 0.1,
+      color: 0xf8faff, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.1
     });
 
-    // 踢脚线/顶线 — 蓝色科技线条
+    // 踢脚线/顶线 — 蓝色
     this.materials.baseboard = new THREE.MeshStandardMaterial({
       color: 0x0066cc, roughness: 0.3, metalness: 0.4, envMapIntensity: 0.5
     });
@@ -198,13 +145,13 @@ export class ExhibitionHall {
     const { size, position } = wallConfig;
     const isLongX = size[0] >= size[2];
     const len = isLongX ? size[0] : size[2];
-    const baseGeo = new THREE.BoxGeometry(isLongX ? len : 0.15, 0.15, isLongX ? 0.15 : len);
+    const baseGeo = new THREE.BoxGeometry(isLongX ? len : 0.2, 0.3, isLongX ? 0.2 : len);
     this._geometries.push(baseGeo);
     const base = new THREE.Mesh(baseGeo, this.materials.baseboard);
     if (isLongX) {
-      base.position.set(position[0], 0.075, position[2]);
+      base.position.set(position[0], 0.15, position[2]);
     } else {
-      base.position.set(position[0], 0.075, position[2]);
+      base.position.set(position[0], 0.15, position[2]);
       base.rotation.y = Math.PI / 2;
     }
     base.castShadow = true;
@@ -215,13 +162,13 @@ export class ExhibitionHall {
     const { size, position } = wallConfig;
     const isLongX = size[0] >= size[2];
     const len = isLongX ? size[0] : size[2];
-    const moldGeo = new THREE.BoxGeometry(isLongX ? len : 0.12, 0.12, isLongX ? 0.12 : len);
+    const moldGeo = new THREE.BoxGeometry(isLongX ? len : 0.15, 0.2, isLongX ? 0.15 : len);
     this._geometries.push(moldGeo);
     const mold = new THREE.Mesh(moldGeo, this.materials.trim);
     if (isLongX) {
-      mold.position.set(position[0], size[1] - 0.06, position[2]);
+      mold.position.set(position[0], size[1] - 0.1, position[2]);
     } else {
-      mold.position.set(position[0], size[1] - 0.06, position[2]);
+      mold.position.set(position[0], size[1] - 0.1, position[2]);
       mold.rotation.y = Math.PI / 2;
     }
     this.scene.add(mold);
@@ -231,16 +178,16 @@ export class ExhibitionHall {
     const { size, position } = wallConfig;
     const isLongX = size[0] >= size[2];
     const len = isLongX ? size[0] : size[2];
-    // 墙面中间蓝色科技条（腰带线）
-    const stripGeo = new THREE.BoxGeometry(isLongX ? len : 0.06, 0.04, isLongX ? 0.06 : len);
+    // 墙面中间蓝色发光条
+    const stripGeo = new THREE.BoxGeometry(isLongX ? len - 0.2 : 0.08, 0.06, isLongX ? 0.08 : len - 0.2);
     this._geometries.push(stripGeo);
     const stripMat = new THREE.MeshStandardMaterial({
-      color: 0x0088ff, roughness: 0.3, metalness: 0.5,
-      emissive: 0x0088ff, emissiveIntensity: 0.3
+      color: 0x00a0ff, roughness: 0.2, metalness: 0.5,
+      emissive: 0x00a0ff, emissiveIntensity: 0.5
     });
     this._trackedMaterials.push(stripMat);
     const strip = new THREE.Mesh(stripGeo, stripMat);
-    strip.position.set(position[0], size[1] * 0.4, position[2]);
+    strip.position.set(position[0], size[1] * 0.35, position[2]);
     this.scene.add(strip);
   }
 
