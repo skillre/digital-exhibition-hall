@@ -231,38 +231,99 @@ export class ExhibitionHall {
   createDecorations() {
     this.createEntrance();
     this.createExhibitionSigns();
+    this.createCrownMolding();
+    this.createWainscoting();
+    this.createReceptionDesk();
+    this.createBenches();
+    this.createPottedPlants();
+    this.createWallSconces();
+    this.createFloorAccents();
   }
 
+  /**
+   * 入口大门 — 玻璃门+金属框架
+   */
   createEntrance() {
-    const { depth } = this.config;
+    const { width, height, depth } = this.config;
 
-    const doorFrameGeometry = new THREE.BoxGeometry(4, 3.5, 0.2);
-    this._geometries.push(doorFrameGeometry);
-
-    const doorFrameMaterial = new THREE.MeshStandardMaterial({
-      color: 0x5b7fa5,
-      roughness: 0.3,
-      metalness: 0.6
+    // 门框（金属）
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0x5b7fa5, roughness: 0.3, metalness: 0.7
     });
-    this._trackedMaterials.push(doorFrameMaterial);
+    this._trackedMaterials.push(frameMat);
 
-    const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
-    doorFrame.position.set(0, 1.75, depth / 2);
-    this.scene.add(doorFrame);
+    // 左门柱
+    const pillarGeo = new THREE.BoxGeometry(0.15, height, 0.3);
+    this._geometries.push(pillarGeo);
+    const leftPillar = new THREE.Mesh(pillarGeo, frameMat);
+    leftPillar.position.set(-1.8, height / 2, depth / 2);
+    this.scene.add(leftPillar);
+    const rightPillar = new THREE.Mesh(pillarGeo, frameMat);
+    rightPillar.position.set(1.8, height / 2, depth / 2);
+    this.scene.add(rightPillar);
 
+    // 门楣
+    const lintelGeo = new THREE.BoxGeometry(3.8, 0.2, 0.3);
+    this._geometries.push(lintelGeo);
+    const lintel = new THREE.Mesh(lintelGeo, frameMat);
+    lintel.position.set(0, height - 0.1, depth / 2);
+    this.scene.add(lintel);
+
+    // 玻璃门（半透明）
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: 0xaad4ee, roughness: 0.05, metalness: 0.1,
+      transparent: true, opacity: 0.25
+    });
+    this._trackedMaterials.push(glassMat);
+    const glassGeo = new THREE.PlaneGeometry(3.5, height - 0.3);
+    this._geometries.push(glassGeo);
+    const glass = new THREE.Mesh(glassGeo, glassMat);
+    glass.position.set(0, height / 2, depth / 2 + 0.05);
+    this.scene.add(glass);
+
+    // 门把手
+    const handleMat = new THREE.MeshStandardMaterial({
+      color: 0xcccccc, roughness: 0.2, metalness: 0.9
+    });
+    this._trackedMaterials.push(handleMat);
+    const handleGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.8, 8);
+    this._geometries.push(handleGeo);
+    const handleL = new THREE.Mesh(handleGeo, handleMat);
+    handleL.position.set(-0.3, 1.3, depth / 2 + 0.1);
+    this.scene.add(handleL);
+    const handleR = new THREE.Mesh(handleGeo, handleMat);
+    handleR.position.set(0.3, 1.3, depth / 2 + 0.1);
+    this.scene.add(handleR);
+
+    // 招牌
     this.createTextSprite('数据安全服务展厅', {
-      x: 0, y: 3.8, z: depth / 2, size: 0.8, color: '#1a365d'
+      x: 0, y: height - 0.5, z: depth / 2 + 0.2, size: 0.7, color: '#1a365d'
     });
+
+    // 入口地垫
+    const matGeo = new THREE.PlaneGeometry(3, 1.2);
+    this._geometries.push(matGeo);
+    const matMat = new THREE.MeshStandardMaterial({
+      color: 0x3a5a7c, roughness: 0.9, metalness: 0.0
+    });
+    this._trackedMaterials.push(matMat);
+    const doorMat = new THREE.Mesh(matGeo, matMat);
+    doorMat.rotation.x = -Math.PI / 2;
+    doorMat.position.set(0, 0.02, depth / 2 - 0.5);
+    this.scene.add(doorMat);
   }
 
+  /**
+   * 展区标识牌
+   */
   createExhibitionSigns() {
     const { width, depth } = this.config;
 
     const signs = [
-      { text: '服务方案', position: [-width / 4, 3, -depth / 2 + 0.1] },
-      { text: '案例成果', position: [width / 4, 3, -depth / 2 + 0.1] },
-      { text: '培训教育', position: [-width / 2 + 0.1, 3, 0] },
-      { text: '技术文档', position: [width / 2 - 0.1, 3, 0] }
+      { text: '服务方案', position: [-width / 4, 3.2, -depth / 2 + 0.12] },
+      { text: '案例成果', position: [width / 4, 3.2, -depth / 2 + 0.12] },
+      { text: '培训教育', position: [-width / 2 + 0.12, 3.2, 0] },
+      { text: '技术文档', position: [width / 2 - 0.12, 3.2, 0] }
     ];
 
     signs.forEach(sign => {
@@ -270,9 +331,291 @@ export class ExhibitionHall {
         x: sign.position[0],
         y: sign.position[1],
         z: sign.position[2],
-        size: 0.5,
-        color: '#2c3e50'
+        size: 0.45,
+        color: '#1a365d'
       });
+    });
+  }
+
+  /**
+   * 顶角线 — 墙壁与天花板交界处的装饰线条
+   */
+  createCrownMolding() {
+    const { width, height, depth } = this.config;
+    const moldingMat = new THREE.MeshStandardMaterial({
+      color: 0xe0e0e0, roughness: 0.6, metalness: 0.05
+    });
+    this._trackedMaterials.push(moldingMat);
+
+    // 后墙
+    const backGeo = new THREE.BoxGeometry(width, 0.12, 0.08);
+    this._geometries.push(backGeo);
+    const back = new THREE.Mesh(backGeo, moldingMat);
+    back.position.set(0, height - 0.06, -depth / 2 + 0.05);
+    this.scene.add(back);
+
+    // 左墙
+    const sideGeo = new THREE.BoxGeometry(0.08, 0.12, depth);
+    this._geometries.push(sideGeo);
+    const left = new THREE.Mesh(sideGeo, moldingMat);
+    left.position.set(-width / 2 + 0.05, height - 0.06, 0);
+    this.scene.add(left);
+    const right = new THREE.Mesh(sideGeo, moldingMat);
+    right.position.set(width / 2 - 0.05, height - 0.06, 0);
+    this.scene.add(right);
+  }
+
+  /**
+   * 墙裙 / 护墙板 — 墙壁下半部分装饰
+   */
+  createWainscoting() {
+    const { width, depth } = this.config;
+    const wainscotMat = new THREE.MeshStandardMaterial({
+      color: 0xd5d5d8, roughness: 0.7, metalness: 0.05
+    });
+    this._trackedMaterials.push(wainscotMat);
+
+    const wainscotH = 1.0;
+
+    // 后墙墙裙
+    const backGeo = new THREE.BoxGeometry(width - 0.2, wainscotH, 0.04);
+    this._geometries.push(backGeo);
+    const back = new THREE.Mesh(backGeo, wainscotMat);
+    back.position.set(0, wainscotH / 2, -depth / 2 + 0.16);
+    this.scene.add(back);
+
+    // 左墙墙裙
+    const sideGeo = new THREE.BoxGeometry(0.04, wainscotH, depth - 0.2);
+    this._geometries.push(sideGeo);
+    const left = new THREE.Mesh(sideGeo, wainscotMat);
+    left.position.set(-width / 2 + 0.16, wainscotH / 2, 0);
+    this.scene.add(left);
+    const right = new THREE.Mesh(sideGeo, wainscotMat);
+    right.position.set(width / 2 - 0.16, wainscotH / 2, 0);
+    this.scene.add(right);
+
+    // 墙裙上沿装饰条
+    const trimMat = new THREE.MeshStandardMaterial({
+      color: 0x8b9dc3, roughness: 0.3, metalness: 0.6
+    });
+    this._trackedMaterials.push(trimMat);
+
+    const trimBackGeo = new THREE.BoxGeometry(width - 0.2, 0.04, 0.06);
+    this._geometries.push(trimBackGeo);
+    const trimBack = new THREE.Mesh(trimBackGeo, trimMat);
+    trimBack.position.set(0, wainscotH, -depth / 2 + 0.17);
+    this.scene.add(trimBack);
+
+    const trimSideGeo = new THREE.BoxGeometry(0.06, 0.04, depth - 0.2);
+    this._geometries.push(trimSideGeo);
+    const trimL = new THREE.Mesh(trimSideGeo, trimMat);
+    trimL.position.set(-width / 2 + 0.17, wainscotH, 0);
+    this.scene.add(trimL);
+    const trimR = new THREE.Mesh(trimSideGeo, trimMat);
+    trimR.position.set(width / 2 - 0.17, wainscotH, 0);
+    this.scene.add(trimR);
+  }
+
+  /**
+   * 前台接待台
+   */
+  createReceptionDesk() {
+    const { depth } = this.config;
+
+    const deskMat = new THREE.MeshStandardMaterial({
+      color: 0x3a5a7c, roughness: 0.4, metalness: 0.2
+    });
+    this._trackedMaterials.push(deskMat);
+
+    // 台面
+    const topGeo = new THREE.BoxGeometry(3, 0.08, 0.8);
+    this._geometries.push(topGeo);
+    const top = new THREE.Mesh(topGeo, deskMat);
+    top.position.set(0, 1.1, depth / 2 - 3);
+    top.castShadow = true;
+    this.scene.add(top);
+
+    // 台身
+    const bodyGeo = new THREE.BoxGeometry(2.8, 1.0, 0.6);
+    this._geometries.push(bodyGeo);
+    const body = new THREE.Mesh(bodyGeo, new THREE.MeshStandardMaterial({
+      color: 0x2c3e50, roughness: 0.6, metalness: 0.15
+    }));
+    this._trackedMaterials.push(body.material);
+    body.position.set(0, 0.5, depth / 2 - 3);
+    body.castShadow = true;
+    this.scene.add(body);
+
+    // 台面标识
+    this.createTextSprite('接待处', {
+      x: 0, y: 1.5, z: depth / 2 - 3, size: 0.25, color: '#1a365d'
+    });
+  }
+
+  /**
+   * 休息座椅
+   */
+  createBenches() {
+    const benchMat = new THREE.MeshStandardMaterial({
+      color: 0x5b7fa5, roughness: 0.5, metalness: 0.2
+    });
+    this._trackedMaterials.push(benchMat);
+    const legMat = new THREE.MeshStandardMaterial({
+      color: 0xaaaaaa, roughness: 0.3, metalness: 0.7
+    });
+    this._trackedMaterials.push(legMat);
+
+    const positions = [
+      { x: -8, z: 5 },
+      { x: 8, z: 5 },
+      { x: 0, z: -5 }
+    ];
+
+    positions.forEach(pos => {
+      // 座面
+      const seatGeo = new THREE.BoxGeometry(2, 0.08, 0.5);
+      this._geometries.push(seatGeo);
+      const seat = new THREE.Mesh(seatGeo, benchMat);
+      seat.position.set(pos.x, 0.5, pos.z);
+      seat.castShadow = true;
+      this.scene.add(seat);
+
+      // 椅腿
+      const legGeo = new THREE.BoxGeometry(0.05, 0.5, 0.05);
+      this._geometries.push(legGeo);
+      [[-0.9, -0.2], [-0.9, 0.2], [0.9, -0.2], [0.9, 0.2]].forEach(([lx, lz]) => {
+        const leg = new THREE.Mesh(legGeo, legMat);
+        leg.position.set(pos.x + lx, 0.25, pos.z + lz);
+        this.scene.add(leg);
+      });
+    });
+  }
+
+  /**
+   * 盆栽绿植
+   */
+  createPottedPlants() {
+    const potMat = new THREE.MeshStandardMaterial({
+      color: 0x8b6f47, roughness: 0.8, metalness: 0.0
+    });
+    this._trackedMaterials.push(potMat);
+    const leafMat = new THREE.MeshStandardMaterial({
+      color: 0x3a7a3a, roughness: 0.8, metalness: 0.0
+    });
+    this._trackedMaterials.push(leafMat);
+    const trunkMat = new THREE.MeshStandardMaterial({
+      color: 0x5a4a3a, roughness: 0.9, metalness: 0.0
+    });
+    this._trackedMaterials.push(trunkMat);
+
+    const positions = [
+      { x: -12, z: -12 },
+      { x: 12, z: -12 },
+      { x: -12, z: 12 },
+      { x: 12, z: 12 },
+      { x: -5, z: 0 },
+      { x: 5, z: 0 }
+    ];
+
+    positions.forEach(pos => {
+      // 花盆
+      const potGeo = new THREE.CylinderGeometry(0.25, 0.2, 0.4, 12);
+      this._geometries.push(potGeo);
+      const pot = new THREE.Mesh(potGeo, potMat);
+      pot.position.set(pos.x, 0.2, pos.z);
+      this.scene.add(pot);
+
+      // 树干
+      const trunkGeo = new THREE.CylinderGeometry(0.05, 0.07, 1.0, 8);
+      this._geometries.push(trunkGeo);
+      const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+      trunk.position.set(pos.x, 0.9, pos.z);
+      this.scene.add(trunk);
+
+      // 树冠
+      const crownGeo = new THREE.SphereGeometry(0.5, 12, 10);
+      this._geometries.push(crownGeo);
+      const crown = new THREE.Mesh(crownGeo, leafMat);
+      crown.position.set(pos.x, 1.7, pos.z);
+      crown.castShadow = true;
+      this.scene.add(crown);
+    });
+  }
+
+  /**
+   * 壁灯装饰
+   */
+  createWallSconces() {
+    const { width, depth } = this.config;
+
+    const sconceMat = new THREE.MeshStandardMaterial({
+      color: 0xcccccc, roughness: 0.3, metalness: 0.7
+    });
+    this._trackedMaterials.push(sconceMat);
+    const shadeMat = new THREE.MeshStandardMaterial({
+      color: 0xfff5e6, roughness: 0.5, metalness: 0.0,
+      emissive: 0xfff5e6, emissiveIntensity: 0.5
+    });
+    this._trackedMaterials.push(shadeMat);
+
+    const positions = [
+      // 后墙
+      { x: -8, z: -depth / 2 + 0.2, ry: 0 },
+      { x: 8, z: -depth / 2 + 0.2, ry: 0 },
+      // 左墙
+      { x: -width / 2 + 0.2, z: -8, ry: Math.PI / 2 },
+      { x: -width / 2 + 0.2, z: 8, ry: Math.PI / 2 },
+      // 右墙
+      { x: width / 2 - 0.2, z: -8, ry: -Math.PI / 2 },
+      { x: width / 2 - 0.2, z: 8, ry: -Math.PI / 2 }
+    ];
+
+    positions.forEach(pos => {
+      // 灯座
+      const baseGeo = new THREE.BoxGeometry(0.15, 0.15, 0.08);
+      this._geometries.push(baseGeo);
+      const base = new THREE.Mesh(baseGeo, sconceMat);
+      base.position.set(pos.x, 2.2, pos.z);
+      this.scene.add(base);
+
+      // 灯罩
+      const shadeGeo = new THREE.SphereGeometry(0.12, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+      this._geometries.push(shadeGeo);
+      const shade = new THREE.Mesh(shadeGeo, shadeMat);
+      shade.position.set(pos.x, 2.3, pos.z);
+      shade.rotation.y = pos.ry;
+      this.scene.add(shade);
+
+      // 暖光
+      const light = new THREE.PointLight(0xfff0dd, 0.3, 6);
+      light.position.set(pos.x, 2.2, pos.z);
+      this.scene.add(light);
+    });
+  }
+
+  /**
+   * 地面装饰线 — 展区边界标识
+   */
+  createFloorAccents() {
+    const { width, depth } = this.config;
+    const lineMat = new THREE.MeshStandardMaterial({
+      color: 0x5b7fa5, roughness: 0.4, metalness: 0.3
+    });
+    this._trackedMaterials.push(lineMat);
+
+    // 展区之间的装饰地面线条
+    const accentPositions = [
+      // 中心十字线
+      { sx: 0.06, sy: 0.02, sz: depth, px: 0, pz: 0 },
+      { sx: width, sy: 0.02, sz: 0.06, px: 0, pz: 0 }
+    ];
+
+    accentPositions.forEach(({ sx, sy, sz, px, pz }) => {
+      const geo = new THREE.BoxGeometry(sx, sy, sz);
+      this._geometries.push(geo);
+      const line = new THREE.Mesh(geo, lineMat);
+      line.position.set(px, 0.015, pz);
+      this.scene.add(line);
     });
   }
 
