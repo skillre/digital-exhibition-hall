@@ -61,12 +61,12 @@ export class ExhibitionHall {
       color: 0x0c1a30, roughness: 0.2, metalness: 0.3, envMapIntensity: 0.8
     });
 
-    this.materials.wall = new THREE.MeshStandardMaterial({
-      color: 0xffffff, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.15
+    this.materials.wall = new THREE.MeshBasicMaterial({
+      color: 0xf5f7fa
     });
 
-    this.materials.ceiling = new THREE.MeshStandardMaterial({
-      color: 0xffffff, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.1
+    this.materials.ceiling = new THREE.MeshBasicMaterial({
+      color: 0xfafbfc
     });
 
     // 踢脚线/顶线 — 蓝色
