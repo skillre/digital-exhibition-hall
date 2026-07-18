@@ -235,7 +235,8 @@ export class PlayerControls {
     }
 
     // 计算移动方向
-    this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
+    // Three.js 相机面向 -Z，translateZ(负) 才是前进
+    this.direction.z = Number(this.moveBackward) - Number(this.moveForward);
     this.direction.x = Number(this.moveRight) - Number(this.moveLeft);
     this.direction.normalize();
 
@@ -290,9 +291,10 @@ export class PlayerControls {
       }
     } else if (axis === 'z') {
       if (this.moveForward) {
-        direction = this.camera.getWorldDirection(new THREE.Vector3());
+        // 前进 = 相机朝向的反方向（-Z 世界空间）
+        direction = this.camera.getWorldDirection(new THREE.Vector3()).negate();
       } else if (this.moveBackward) {
-        direction = new THREE.Vector3(0, 0, 1).applyQuaternion(this.camera.quaternion);
+        direction = this.camera.getWorldDirection(new THREE.Vector3());
       } else {
         return false;
       }
