@@ -37,7 +37,7 @@ export class TechCenterpiece {
     const geo = new THREE.ShapeGeometry(shape);
     this._geometries.push(geo);
     const mat = new THREE.MeshBasicMaterial({
-      color: THEME.neon, transparent: true, opacity: 0.22,
+      color: THEME.neon, transparent: true, opacity: 0.12,
       side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false
     });
     this._materials.push(mat);
@@ -71,7 +71,7 @@ export class TechCenterpiece {
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     this._geometries.push(geo);
     const mat = new THREE.PointsMaterial({
-      color: THEME.neon, size: 0.06, transparent: true, opacity: 0.8,
+      color: THEME.neon, size: 0.06, transparent: true, opacity: 0.4,
       blending: THREE.AdditiveBlending, depthWrite: false
     });
     this._materials.push(mat);
@@ -82,7 +82,7 @@ export class TechCenterpiece {
   createBaseRing() {
     const ringGeo = new THREE.TorusGeometry(2.2, 0.03, 8, 64);
     this._geometries.push(ringGeo);
-    const ringMat = new THREE.MeshBasicMaterial({ color: THEME.neon, transparent: true, opacity: 0.6 });
+    const ringMat = new THREE.MeshBasicMaterial({ color: THEME.neon, transparent: true, opacity: 0.3 });
     this._materials.push(ringMat);
     this._baseRing = new THREE.Mesh(ringGeo, ringMat);
     this._baseRing.rotation.x = Math.PI / 2;

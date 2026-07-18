@@ -61,20 +61,20 @@ export class ExhibitionHall {
       color: 0x0c1a30, roughness: 0.2, metalness: 0.3, envMapIntensity: 0.8
     });
 
-    this.materials.wall = new THREE.MeshBasicMaterial({
-      color: 0xaac0d4  // 浅冰蓝 — 明显能看出是蓝色，不刺眼
+    this.materials.wall = new THREE.MeshStandardMaterial({
+      color: 0xffffff, roughness: 0.9, metalness: 0.0, envMapIntensity: 0.1
     });
 
-    this.materials.ceiling = new THREE.MeshBasicMaterial({
-      color: 0xc8d8e8  // 浅蓝白
+    this.materials.ceiling = new THREE.MeshStandardMaterial({
+      color: 0xffffff, roughness: 0.9, metalness: 0.0, envMapIntensity: 0.1
     });
 
-    // 踢脚线/顶线 — 蓝色
+    // 踢脚线/顶线 — 深色（不抢眼）
     this.materials.baseboard = new THREE.MeshStandardMaterial({
-      color: 0x0066cc, roughness: 0.3, metalness: 0.4, envMapIntensity: 0.5
+      color: 0x1a1e22, roughness: 0.5, metalness: 0.3
     });
     this.materials.trim = new THREE.MeshStandardMaterial({
-      color: 0x0055bb, roughness: 0.3, metalness: 0.4, envMapIntensity: 0.5
+      color: 0x1a1e22, roughness: 0.5, metalness: 0.3
     });
 
     // 展板：半透明玻璃数据屏（数字化元素）
@@ -124,7 +124,6 @@ export class ExhibitionHall {
       this.walls.push(this.createWallMesh(c));
       this.createBaseboard(c);
       this.createCrownMolding(c);
-      this.createWallBlueStrip(c); // 科技蓝装饰条
     });
   }
 
@@ -172,23 +171,6 @@ export class ExhibitionHall {
       mold.rotation.y = Math.PI / 2;
     }
     this.scene.add(mold);
-  }
-
-  createWallBlueStrip(wallConfig) {
-    const { size, position } = wallConfig;
-    const isLongX = size[0] >= size[2];
-    const len = isLongX ? size[0] : size[2];
-    // 墙面中间蓝色发光条
-    const stripGeo = new THREE.BoxGeometry(isLongX ? len - 0.2 : 0.08, 0.06, isLongX ? 0.08 : len - 0.2);
-    this._geometries.push(stripGeo);
-    const stripMat = new THREE.MeshStandardMaterial({
-      color: 0x00a0ff, roughness: 0.2, metalness: 0.5,
-      emissive: 0x00a0ff, emissiveIntensity: 0.5
-    });
-    this._trackedMaterials.push(stripMat);
-    const strip = new THREE.Mesh(stripGeo, stripMat);
-    strip.position.set(position[0], size[1] * 0.35, position[2]);
-    this.scene.add(strip);
   }
 
   createCeiling() {
@@ -243,7 +225,6 @@ export class ExhibitionHall {
     this.createEntrance();
     this.createExhibitionSigns();
     this.createFloorAccents();
-    this.createTechPillars();
   }
 
   createEntrance() {
@@ -279,51 +260,39 @@ export class ExhibitionHall {
   }
 
   createFloorAccents() {
-    // 数字化地面引导线（青色细线）
+    // 蓝色LED地灯条（沿墙脚）
     const { width, depth } = this.config;
-    const lineMat = this.materials.edgeGlow;
-    [{ sx: 0.03, sy: 0.008, sz: depth, px: 0, pz: 0 },
-     { sx: width, sy: 0.008, sz: 0.03, px: 0, pz: 0 }
-    ].forEach(({ sx, sy, sz, px, pz }) => {
-      const geo = new THREE.BoxGeometry(sx, sy, sz);
+    const blueMat = new THREE.MeshBasicMaterial({
+      color: 0x00d2ff, transparent: true, opacity: 0.6
+    });
+    this._trackedMaterials.push(blueMat);
+    // 四条边线
+    const wallDist = 0.25;
+    [
+      { x: 0, z: -depth/2 + wallDist, sx: width, sz: 0.04 },
+      { x: 0, z: depth/2 - wallDist, sx: width, sz: 0.04 },
+      { x: -width/2 + wallDist, z: 0, sx: 0.04, sz: depth },
+      { x: width/2 - wallDist, z: 0, sx: 0.04, sz: depth },
+    ].forEach(({ x, z, sx, sz }) => {
+      const geo = new THREE.BoxGeometry(sx, 0.02, sz);
       this._geometries.push(geo);
-      const line = new THREE.Mesh(geo, lineMat);
-      line.position.set(px, 0.01, pz);
+      const line = new THREE.Mesh(geo, blueMat);
+      line.position.set(x, 0.01, z);
       this.scene.add(line);
     });
-  }
-
-  createTechPillars() {
-    const { width, height, depth } = this.config;
-    const pillarMat = new THREE.MeshStandardMaterial({
-      color: 0xf0f4f8, roughness: 0.3, metalness: 0.2, envMapIntensity: 0.5
+    // 中心十字线
+    const centerMat = new THREE.MeshBasicMaterial({
+      color: 0x00d2ff, transparent: true, opacity: 0.3
     });
-    this._trackedMaterials.push(pillarMat);
-    const pillarGlow = new THREE.MeshStandardMaterial({
-      color: 0x00a0ff, roughness: 0.2, metalness: 0.6,
-      emissive: 0x00a0ff, emissiveIntensity: 0.6
-    });
-    this._trackedMaterials.push(pillarGlow);
-    const positions = [
-      { x: -10, z: -10 }, { x: 10, z: -10 },
-      { x: -10, z: 10 }, { x: 10, z: 10 }
-    ];
-    positions.forEach(pos => {
-      const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.5, height, 0.5), pillarMat);
-      pillar.position.set(pos.x, height / 2, pos.z);
-      pillar.castShadow = true;
-      this._geometries.push(pillar.geometry);
-      this.scene.add(pillar);
-      for (let y = 1; y < height - 0.5; y += 2) {
-        const glowGeo = new THREE.BoxGeometry(0.06, 1.2, 0.52);
-        this._geometries.push(glowGeo);
-        const glow = new THREE.Mesh(glowGeo, pillarGlow);
-        glow.position.set(pos.x + 0.28, y, pos.z);
-        this.scene.add(glow);
-        const glow2 = new THREE.Mesh(glowGeo, pillarGlow);
-        glow2.position.set(pos.x - 0.28, y, pos.z);
-        this.scene.add(glow2);
-      }
+    this._trackedMaterials.push(centerMat);
+    [{ sx: 0.03, sz: depth, px: 0, pz: 0 },
+     { sx: width, sz: 0.03, px: 0, pz: 0 }
+    ].forEach(({ sx, sz, px, pz }) => {
+      const geo = new THREE.BoxGeometry(sx, 0.01, sz);
+      this._geometries.push(geo);
+      const line = new THREE.Mesh(geo, centerMat);
+      line.position.set(px, 0.005, pz);
+      this.scene.add(line);
     });
   }
 
@@ -444,8 +413,8 @@ export class ExhibitionHall {
   // ===== 数据粒子 + 动效 =====
 
   createEntranceParticles() {
-    const particleCount = 200;
-    const spread = 6;
+    const particleCount = 80;
+    const spread = 4;
     const depth = this.config.depth;
     const positions = new Float32Array(particleCount * 3);
     const velocities = new Float32Array(particleCount * 3);
@@ -454,15 +423,15 @@ export class ExhibitionHall {
       positions[i3] = (Math.random() - 0.5) * spread;
       positions[i3 + 1] = 0.5 + Math.random() * 6;
       positions[i3 + 2] = (depth / 2) - 2 + (Math.random() - 0.5) * spread;
-      velocities[i3] = (Math.random() - 0.5) * 0.008;
-      velocities[i3 + 1] = Math.random() * 0.02 + 0.008;
-      velocities[i3 + 2] = (Math.random() - 0.5) * 0.008;
+      velocities[i3] = (Math.random() - 0.5) * 0.005;
+      velocities[i3 + 1] = Math.random() * 0.015 + 0.005;
+      velocities[i3 + 2] = (Math.random() - 0.5) * 0.005;
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     this._geometries.push(geometry);
     const material = new THREE.PointsMaterial({
-      color: THEME.neon, size: 0.05, transparent: true, opacity: 0.6,
+      color: 0x00d2ff, size: 0.03, transparent: true, opacity: 0.35,
       blending: THREE.AdditiveBlending, depthWrite: false
     });
     this._trackedMaterials.push(material);
