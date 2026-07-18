@@ -93,8 +93,8 @@ export class SceneManager {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 2.0;
+    this.renderer.toneMapping = THREE.NoToneMapping;
+    // this.renderer.toneMapping = THREE.ACESFilmicToneMapping;  // 暂时禁用，压暗场景
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
@@ -151,9 +151,9 @@ export class SceneManager {
     // Bloom 辉光通道
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(size.x, size.y),
-      0.8,  // strength
+      0.4,  // strength（降低，避免压暗）
       0.3,  // radius
-      0.2   // threshold
+      0.5   // threshold（提高，只让高亮区域发光）
     );
     this.composer.addPass(bloomPass);
 
