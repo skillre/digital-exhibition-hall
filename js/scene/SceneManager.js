@@ -154,30 +154,9 @@ export class SceneManager {
    * 后处理：Bloom + 扫描线
    */
   createPostProcessing() {
-    try {
-      const size = new THREE.Vector2();
-      this.renderer.getSize(size);
-      this.composer = new EffectComposer(this.renderer);
-      this.composer.addPass(new RenderPass(this.scene, this.camera));
-      const bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(size.x, size.y),
-        THEME.bloom.strength,
-        THEME.bloom.radius,
-        THEME.bloom.threshold
-      );
-      this.composer.addPass(bloomPass);
-      // 轻扫描线
-      const ScanlineShader = {
-        uniforms: { tDiffuse: { value: null }, opacity: { value: 0.04 } },
-        vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-        fragmentShader: `uniform sampler2D tDiffuse; uniform float opacity; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); float s = sin(vUv.y * 800.0) * 0.5 + 0.5; c.rgb -= s * opacity; gl_FragColor = c; }`,
-      };
-      this.composer.addPass(new ShaderPass(ScanlineShader));
-      console.log('后处理初始化完成');
-    } catch (e) {
-      console.error('后处理初始化失败:', e);
-      this.composer = null;
-    }
+    // 暂时禁用后处理
+    this.composer = null;
+    console.log('后处理已禁用');
   }
 
   addObject(object) {
