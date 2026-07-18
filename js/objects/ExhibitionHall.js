@@ -58,23 +58,23 @@ export class ExhibitionHall {
   initMaterials() {
     // 纯色材质（不用程序纹理，确保颜色可见）
     this.materials.floor = new THREE.MeshStandardMaterial({
-      color: 0x0c1a30, roughness: 0.2, metalness: 0.3, envMapIntensity: 0.8
+      color: 0x0c1a30, roughness: 0.15, metalness: 0.8, envMapIntensity: 0.8
     });
 
-    this.materials.wall = new THREE.MeshStandardMaterial({
-      color: 0xffffff, roughness: 0.9, metalness: 0.0, envMapIntensity: 0.1
+    this.materials.wall = new THREE.MeshBasicMaterial({
+      color: 0xe0e4ea
     });
 
-    this.materials.ceiling = new THREE.MeshStandardMaterial({
-      color: 0xffffff, roughness: 0.9, metalness: 0.0, envMapIntensity: 0.1
+    this.materials.ceiling = new THREE.MeshBasicMaterial({
+      color: 0xe8eef4
     });
 
-    // 踢脚线/顶线 — 深色（不抢眼）
+    // 踢脚线/顶线 — 深蓝色（地面反射效果）
     this.materials.baseboard = new THREE.MeshStandardMaterial({
-      color: 0x1a1e22, roughness: 0.5, metalness: 0.3
+      color: 0x0c2040, roughness: 0.3, metalness: 0.5
     });
     this.materials.trim = new THREE.MeshStandardMaterial({
-      color: 0x1a1e22, roughness: 0.5, metalness: 0.3
+      color: 0x0c2040, roughness: 0.3, metalness: 0.5
     });
 
     // 展板：半透明玻璃数据屏（数字化元素）
