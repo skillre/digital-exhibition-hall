@@ -366,13 +366,13 @@ export class UIManager {
 
           // 柱状图
           const gradient = ctx.createLinearGradient(x, y, x, chartHeight + 20);
-          gradient.addColorStop(0, '#00d2ff');
-          gradient.addColorStop(1, '#0066aa');
+          gradient.addColorStop(0, '#0a84ff');
+          gradient.addColorStop(1, '#4aa3ff');
           ctx.fillStyle = gradient;
           ctx.fillRect(x, y, barWidth, barHeight);
 
           // 数值
-          ctx.fillStyle = '#fff';
+          ctx.fillStyle = '#1c2530';
           ctx.font = '12px sans-serif';
           ctx.textAlign = 'center';
           ctx.fillText(`${value}%`, x + barWidth / 2, y - 5);

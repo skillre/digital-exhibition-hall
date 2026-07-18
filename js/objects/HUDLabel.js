@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
 const COL = {
-  bg: 'rgba(8, 16, 32, 0.78)',
-  border: 'rgba(0, 210, 255, 0.7)',
-  text: '#cdeeff',
-  glow: '#00d2ff',
-  dim: '#6f8aab',
+  bg: 'rgba(255, 255, 255, 0.88)',
+  border: 'rgba(10, 132, 255, 0.5)',
+  text: '#1c2530',
+  glow: '#0a84ff',
+  dim: '#6e7a8a',
 };
 const FONT_MONO = 'SF Mono, JetBrains Mono, Menlo, Consolas, monospace';
 

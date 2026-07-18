@@ -37,7 +37,7 @@ export class TechCenterpiece {
     const geo = new THREE.ShapeGeometry(shape);
     this._geometries.push(geo);
     const mat = new THREE.MeshBasicMaterial({
-      color: THEME.neon, transparent: true, opacity: 0.12,
+      color: THEME.accent, transparent: true, opacity: 0.08,
       side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false
     });
     this._materials.push(mat);
@@ -45,12 +45,12 @@ export class TechCenterpiece {
     this.group.add(this.shield);
     const edges = new THREE.EdgesGeometry(geo);
     this._geometries.push(edges);
-    const lineMat = new THREE.LineBasicMaterial({ color: THEME.neon, transparent: true, opacity: 0.9 });
+    const lineMat = new THREE.LineBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.5 });
     this._materials.push(lineMat);
     this.shield.add(new THREE.LineSegments(edges, lineMat));
     const coreGeo = new THREE.IcosahedronGeometry(0.32, 0);
     this._geometries.push(coreGeo);
-    const coreMat = new THREE.MeshBasicMaterial({ color: THEME.ice, wireframe: true, transparent: true, opacity: 0.85 });
+    const coreMat = new THREE.MeshBasicMaterial({ color: THEME.accentDim, wireframe: true, transparent: true, opacity: 0.7 });
     this._materials.push(coreMat);
     this._coreMesh = new THREE.Mesh(coreGeo, coreMat);
     this.shield.add(this._coreMesh);
@@ -71,7 +71,7 @@ export class TechCenterpiece {
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     this._geometries.push(geo);
     const mat = new THREE.PointsMaterial({
-      color: THEME.neon, size: 0.06, transparent: true, opacity: 0.4,
+      color: THEME.accent, size: 0.06, transparent: true, opacity: 0.2,
       blending: THREE.AdditiveBlending, depthWrite: false
     });
     this._materials.push(mat);
@@ -82,7 +82,7 @@ export class TechCenterpiece {
   createBaseRing() {
     const ringGeo = new THREE.TorusGeometry(2.2, 0.03, 8, 64);
     this._geometries.push(ringGeo);
-    const ringMat = new THREE.MeshBasicMaterial({ color: THEME.neon, transparent: true, opacity: 0.3 });
+    const ringMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.15 });
     this._materials.push(ringMat);
     this._baseRing = new THREE.Mesh(ringGeo, ringMat);
     this._baseRing.rotation.x = Math.PI / 2;

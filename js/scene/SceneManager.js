@@ -1,7 +1,8 @@
 /**
  * 场景管理器
- * 视觉风格：深蓝赛博 Cyber Blue
- * 核心技术：暗色科技环境贴图 + PBR 材质 + Bloom + 扫描线后处理
+ * 视觉方向（唯一）：明亮科技极简（Apple Store 感）
+ * 核心：明亮白系环境贴图 + 统一 PBR 建筑面 + 明亮灯光 + 克制 Bloom
+ * 明度总闸：灯光强度 + THEME.exposure（ACESFilmic），只在此处控制。
  */
 
 import * as THREE from 'three';
@@ -71,28 +72,30 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
+    // 明度总闸：唯一曝光来源
+    this.renderer.toneMappingExposure = THEME.exposure;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
   /**
-   * 创建环境贴图 — 亮色科技版
+   * 创建环境贴图 — 明亮白系
+   * 给 PBR 建筑面提供柔和明亮的反射环境，使空间通透干净。
    */
   createEnvironment() {
     try {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x3a4a60);
+      envScene.background = new THREE.Color(0xf4f6f9);
       const panelGeo = new THREE.PlaneGeometry(10, 10);
-      const bright = new THREE.MeshBasicMaterial({ color: 0x8ab4d4 });
-      const mid = new THREE.MeshBasicMaterial({ color: 0x3a4a60 });
-      const floor = new THREE.MeshBasicMaterial({ color: 0x0c1a30 });
+      const bright = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const mid = new THREE.MeshBasicMaterial({ color: 0xe6ebf1 });
+      const floor = new THREE.MeshBasicMaterial({ color: 0xd6dce4 });
       const faces = [
         { mat: floor, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
         { mat: bright, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
-        { mat: bright, pos: [0, 0, -5], rot: [0, 0, 0] },
-        { mat: bright, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
+        { mat: mid, pos: [0, 0, -5], rot: [0, 0, 0] },
+        { mat: mid, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
         { mat: mid, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
         { mat: mid, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
       ];
@@ -112,11 +115,14 @@ export class SceneManager {
   }
 
   /**
-   * 创建灯光 — 暗冷色 + 青色补光
+   * 创建灯光 — 明亮基调 + 克制蓝色补光
    */
   createLighting() {
     const a = this.lightingConfig.ambient;
     this.scene.add(new THREE.AmbientLight(a.color, a.intensity));
+
+    const h = this.lightingConfig.hemisphere;
+    this.scene.add(new THREE.HemisphereLight(h.sky, h.ground, h.intensity));
 
     const d = this.lightingConfig.directional;
     const dir = new THREE.DirectionalLight(d.color, d.intensity);
@@ -133,21 +139,11 @@ export class SceneManager {
     dir.shadow.bias = -0.0005;
     this.scene.add(dir);
 
-    const h = this.lightingConfig.hemisphere;
-    this.scene.add(new THREE.HemisphereLight(h.sky, h.ground, h.intensity));
-
+    // 蓝色科技补光（克制，只给空间一点蓝调氛围）
     const ac = this.lightingConfig.accent;
-    const accent = new THREE.PointLight(ac.color, ac.intensity, 30);
+    const accent = new THREE.PointLight(ac.color, ac.intensity, 35);
     accent.position.set(0, 6, 0);
     this.scene.add(accent);
-
-    // 白色补光
-    const warmFill = new THREE.PointLight(0xffffff, 0.3, 25);
-    warmFill.position.set(-8, 6, 5);
-    this.scene.add(warmFill);
-    const warmFill2 = new THREE.PointLight(0xffffff, 0.2, 20);
-    warmFill2.position.set(8, 6, -5);
-    this.scene.add(warmFill2);
   }
 
   /**

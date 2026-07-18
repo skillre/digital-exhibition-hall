@@ -159,7 +159,7 @@ export class Minimap {
    */
   drawExhibitionZones(ctx) {
     const colors = {
-      plans: '#00d2ff',
+      plans: '#0a84ff',
       cases: '#ff6b6b',
       training: '#ffd93d',
       docs: '#6bcb77'
@@ -169,7 +169,7 @@ export class Minimap {
       const x = this.offsetX + zone.x * this.scale - 8;
       const y = this.offsetY + zone.z * this.scale - 8;
 
-      ctx.fillStyle = colors[zone.id] || '#00d2ff';
+      ctx.fillStyle = colors[zone.id] || '#0a84ff';
       ctx.globalAlpha = 0.6;
       ctx.fillRect(x, y, 16, 16);
       ctx.globalAlpha = 1;
