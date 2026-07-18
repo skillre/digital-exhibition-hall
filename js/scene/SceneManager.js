@@ -1,22 +1,15 @@
 /**
  * 场景管理器
  * 负责创建和管理 Three.js 场景、相机、渲染器
- * Phase 1: ES Module 迁移 + EffectComposer 后处理管线
+ * 视觉风格：拟物感 — 模拟真实展厅环境
  */
 
 import * as THREE from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-// import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass';  // 暂时禁用，压暗场景
 
 export class SceneManager {
-  /**
-   * 构造函数
-   * @param {Object} sceneConfig - 场景配置
-   * @param {Object} cameraConfig - 相机配置
-   * @param {Object} lightingConfig - 灯光配置
-   */
   constructor(sceneConfig, cameraConfig, lightingConfig) {
     this.sceneConfig = sceneConfig;
     this.cameraConfig = cameraConfig;
@@ -31,22 +24,15 @@ export class SceneManager {
     this.clock = new THREE.Clock();
   }
 
-  /**
-   * 初始化场景
-   */
   init() {
     this.createScene();
     this.createCamera();
     this.createRenderer();
     this.createLighting();
     this.createPostProcessing();
-
     console.log('场景管理器初始化完成');
   }
 
-  /**
-   * 创建场景
-   */
   createScene() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(this.sceneConfig.backgroundColor);
@@ -60,29 +46,17 @@ export class SceneManager {
     }
   }
 
-  /**
-   * 创建相机
-   */
   createCamera() {
     const { fov, near, far, position } = this.cameraConfig;
-
     this.camera = new THREE.PerspectiveCamera(
-      fov,
-      window.innerWidth / window.innerHeight,
-      near,
-      far
+      fov, window.innerWidth / window.innerHeight, near, far
     );
-
     this.camera.position.set(position.x, position.y, position.z);
     this.camera.lookAt(0, 0, 0);
   }
 
-  /**
-   * 创建渲染器
-   */
   createRenderer() {
     const canvas = document.getElementById('canvas3d');
-
     this.renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       antialias: true,
@@ -93,28 +67,27 @@ export class SceneManager {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.NoToneMapping;
-    // this.renderer.toneMapping = THREE.ACESFilmicToneMapping;  // 暂时禁用，压暗场景
+    this.renderer.toneMapping = THREE.LinearToneMapping;
+    this.renderer.toneMappingExposure = 1.0;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
   /**
-   * 创建灯光
+   * 创建灯光 — 模拟真实展厅照明
    */
   createLighting() {
-    // 环境光
+    // 环境光：模拟墙壁、天花板反射的均匀光
     const ambientLight = new THREE.AmbientLight(
       this.lightingConfig.ambient.color,
       this.lightingConfig.ambient.intensity
     );
     this.scene.add(ambientLight);
 
-    // 方向光（主光源）
+    // 方向光：模拟从窗户/天窗进来的自然光
     const directionalLight = new THREE.DirectionalLight(
       this.lightingConfig.directional.color,
       this.lightingConfig.directional.intensity
     );
-
     const { x, y, z } = this.lightingConfig.directional.position;
     directionalLight.position.set(x, y, z);
 
@@ -123,20 +96,26 @@ export class SceneManager {
     directionalLight.shadow.mapSize.height = 2048;
     directionalLight.shadow.camera.near = 0.5;
     directionalLight.shadow.camera.far = 50;
-    directionalLight.shadow.camera.left = -20;
-    directionalLight.shadow.camera.right = 20;
-    directionalLight.shadow.camera.top = 20;
-    directionalLight.shadow.camera.bottom = -20;
+    directionalLight.shadow.camera.left = -25;
+    directionalLight.shadow.camera.right = 25;
+    directionalLight.shadow.camera.top = 25;
+    directionalLight.shadow.camera.bottom = -25;
+    directionalLight.shadow.bias = -0.0005;
 
     this.scene.add(directionalLight);
 
-    // 半球光
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x666688, 0.8);
+    // 半球光：天空蓝 + 地面暖色，模拟户外反射
+    const hemisphereLight = new THREE.HemisphereLight(0xddeeff, 0x998877, 0.5);
     this.scene.add(hemisphereLight);
+
+    // 补光：从反方向照，消除死角
+    const fillLight = new THREE.DirectionalLight(0xfff0dd, 0.4);
+    fillLight.position.set(-5, 8, -5);
+    this.scene.add(fillLight);
   }
 
   /**
-   * 创建后处理管线
+   * 后处理 — 轻度 Bloom，不做压暗处理
    */
   createPostProcessing() {
     const size = new THREE.Vector2();
@@ -144,51 +123,32 @@ export class SceneManager {
 
     this.composer = new EffectComposer(this.renderer);
 
-    // 渲染通道
     const renderPass = new RenderPass(this.scene, this.camera);
     this.composer.addPass(renderPass);
 
-    // Bloom 辉光通道
+    // 轻度 Bloom：只让灯带等高亮物体微微发光
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(size.x, size.y),
-      0.4,  // strength（降低，避免压暗）
-      0.3,  // radius
-      0.5   // threshold（提高，只让高亮区域发光）
+      0.2,  // strength — 很轻
+      0.5,  // radius — 大范围柔光
+      0.8   // threshold — 只有最亮的才发光
     );
     this.composer.addPass(bloomPass);
 
-    // SSAO 暂时禁用（压暗场景）
-    // const ssaoPass = new SSAOPass(this.scene, this.camera, size.x, size.y);
-    // ssaoPass.kernelRadius = 4;
-    // ssaoPass.minDistance = 0.005;
-    // ssaoPass.maxDistance = 0.1;
-    // this.composer.addPass(ssaoPass);
-
-    console.log('后处理管线初始化完成 (SSAO 已禁用)');
+    console.log('后处理管线初始化完成');
   }
 
-  /**
-   * 添加对象到场景
-   */
   addObject(object) {
     this.scene.add(object);
     this.objects.push(object);
   }
 
-  /**
-   * 从场景移除对象
-   */
   removeObject(object) {
     this.scene.remove(object);
     const index = this.objects.indexOf(object);
-    if (index > -1) {
-      this.objects.splice(index, 1);
-    }
+    if (index > -1) this.objects.splice(index, 1);
   }
 
-  /**
-   * 渲染场景（使用后处理管线）
-   */
   render() {
     if (this.composer) {
       this.composer.render();
@@ -197,18 +157,12 @@ export class SceneManager {
     }
   }
 
-  /**
-   * 窗口大小调整处理
-   */
   onWindowResize() {
     if (this.camera && this.renderer) {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-      if (this.composer) {
-        this.composer.setSize(window.innerWidth, window.innerHeight);
-      }
+      if (this.composer) this.composer.setSize(window.innerWidth, window.innerHeight);
     }
   }
 
@@ -217,34 +171,20 @@ export class SceneManager {
   getRenderer() { return this.renderer; }
   getObjects() { return this.objects; }
 
-  /**
-   * 清理资源
-   */
   dispose() {
-    // 清理后处理管线
     if (this.composer) {
-      this.composer.passes.forEach(pass => {
-        if (pass.dispose) pass.dispose();
-      });
+      this.composer.passes.forEach(pass => { if (pass.dispose) pass.dispose(); });
       this.composer.dispose();
     }
-
     this.objects.forEach(obj => {
       this.scene.remove(obj);
       if (obj.geometry) obj.geometry.dispose();
       if (obj.material) {
-        if (Array.isArray(obj.material)) {
-          obj.material.forEach(material => material.dispose());
-        } else {
-          obj.material.dispose();
-        }
+        if (Array.isArray(obj.material)) obj.material.forEach(m => m.dispose());
+        else obj.material.dispose();
       }
     });
-
-    if (this.renderer) {
-      this.renderer.dispose();
-    }
-
+    if (this.renderer) this.renderer.dispose();
     console.log('场景管理器资源已清理');
   }
 }

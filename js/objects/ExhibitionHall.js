@@ -3,25 +3,21 @@ import * as THREE from 'three';
 /**
  * 展厅模型
  * 负责创建 3D 展厅空间
+ * 视觉风格：拟物感 — 模拟真实展厅的材质和光照
  */
 
 export class ExhibitionHall {
-  /**
-   * 构造函数
-   * @param {Object} config - 展厅配置
-   */
   constructor(config) {
     this.config = config;
     this.scene = null;
 
-    // 展厅组件
     this.floor = null;
     this.ceiling = null;
     this.walls = [];
     this.panels = [];
     this.exhibitions = [];
+    this.particles = null;
 
-    // 材质
     this.materials = {
       floor: null,
       wall: null,
@@ -30,91 +26,75 @@ export class ExhibitionHall {
       panelHover: null
     };
 
-    // 粒子系统
-    this.particles = null;
-
-    // 资源追踪（Phase 3: 修复资源泄漏）
     this._textures = [];
     this._geometries = [];
-    this._trackedMaterials = [];  // 追踪局部创建的材质
+    this._trackedMaterials = [];
   }
 
-  /**
-   * 创建展厅
-   * @param {THREE.Scene} scene - 场景对象
-   */
   create(scene) {
     this.scene = scene;
-
     this.initMaterials();
     this.createFloor();
     this.createWalls();
     this.createCeiling();
     this.createDecorations();
     this.createEntranceParticles();
-
     console.log('展厅创建完成');
   }
 
   /**
-   * 初始化材质
+   * 初始化材质 — 拟物感：模拟真实展厅材料
    */
   initMaterials() {
-    // 地面：深色反光地板
+    // 地面：浅灰大理石质感
     this.materials.floor = new THREE.MeshStandardMaterial({
-      color: 0x2a2a3e,
-      roughness: 0.3,
-      metalness: 0.5
-    });
-
-    // 墙壁：带微光的深色墙面
-    this.materials.wall = new THREE.MeshStandardMaterial({
-      color: 0x3a3a4e,
-      roughness: 0.6,
-      metalness: 0.3,
-      emissive: 0x1a1a30,
-      emissiveIntensity: 0.15
-    });
-
-    // 天花板
-    this.materials.ceiling = new THREE.MeshStandardMaterial({
-      color: 0x2e2e42,
-      roughness: 0.7,
-      metalness: 0.2
-    });
-
-    // 展板：深色底板
-    this.materials.panel = new THREE.MeshStandardMaterial({
-      color: 0x1a1a2e,
+      color: 0xc8c8d0,
       roughness: 0.4,
-      metalness: 0.5
+      metalness: 0.05
     });
 
-    // 展板悬停：发光效果
+    // 墙壁：白色墙面
+    this.materials.wall = new THREE.MeshStandardMaterial({
+      color: 0xe8e8ec,
+      roughness: 0.85,
+      metalness: 0.0
+    });
+
+    // 天花板：白色天花板
+    this.materials.ceiling = new THREE.MeshStandardMaterial({
+      color: 0xf0f0f4,
+      roughness: 0.9,
+      metalness: 0.0
+    });
+
+    // 展板：深色展示面板（对比白色墙面）
+    this.materials.panel = new THREE.MeshStandardMaterial({
+      color: 0x2c3e50,
+      roughness: 0.6,
+      metalness: 0.1,
+      emissive: 0x0a1628,
+      emissiveIntensity: 0.1
+    });
+
+    // 展板悬停：蓝色高光
     this.materials.panelHover = new THREE.MeshStandardMaterial({
-      color: 0x003355,
-      roughness: 0.3,
-      metalness: 0.5,
-      emissive: 0x00d2ff,
-      emissiveIntensity: 0.4
+      color: 0x1a5276,
+      roughness: 0.4,
+      metalness: 0.2,
+      emissive: 0x2980b9,
+      emissiveIntensity: 0.3
     });
 
-    // 墙壁边缘发光条
+    // 墙壁装饰线条（金属条）
     this.materials.edgeGlow = new THREE.MeshStandardMaterial({
-      color: 0x00d2ff,
-      emissive: 0x00d2ff,
-      emissiveIntensity: 0.8,
-      roughness: 0.2,
+      color: 0x8b9dc3,
+      roughness: 0.3,
       metalness: 0.8
     });
   }
 
-  /**
-   * 创建地面
-   */
   createFloor() {
     const { width, depth } = this.config;
-
     const geometry = new THREE.PlaneGeometry(width, depth);
     this._geometries.push(geometry);
 
@@ -126,25 +106,20 @@ export class ExhibitionHall {
     this.addGridHelper(width, depth);
   }
 
-  /**
-   * 添加网格辅助线（科技感发光网格）
-   */
   addGridHelper(width, depth) {
+    // 浅色细线网格 — 模拟地砖缝线
     const gridHelper = new THREE.GridHelper(
       Math.max(width, depth),
       20,
-      0x004466,
-      0x002233
+      0xaaaaaa,
+      0xcccccc
     );
-    gridHelper.position.y = 0.02;
-    gridHelper.material.opacity = 0.6;
+    gridHelper.position.y = 0.01;
+    gridHelper.material.opacity = 0.15;
     gridHelper.material.transparent = true;
     this.scene.add(gridHelper);
   }
 
-  /**
-   * 创建墙壁
-   */
   createWalls() {
     const { width, height, depth, wallThickness } = this.config;
 
@@ -161,39 +136,12 @@ export class ExhibitionHall {
       this.walls.push(wall);
     });
 
-    // 墙壁底部发光条
-    this.createWallEdgeStrips(wallConfigs);
+    // 墙壁底部踢脚线
+    this.createBaseboard(wallConfigs);
   }
 
-  /**
-   * 创建墙壁底部发光条
-   */
-  createWallEdgeStrips(wallConfigs) {
-    wallConfigs.forEach(config => {
-      const { size, position } = config;
-      const stripWidth = Math.max(size[0], size[2]);
-      const stripGeometry = new THREE.BoxGeometry(stripWidth, 0.08, 0.05);
-      this._geometries.push(stripGeometry);
-
-      const strip = new THREE.Mesh(stripGeometry, this.materials.edgeGlow);
-      if (size[2] < size[0]) {
-        // 前后墙
-        strip.position.set(position[0], 0.04, position[2]);
-      } else {
-        // 左右墙
-        strip.position.set(position[0], 0.04, position[2]);
-        strip.rotation.y = Math.PI / 2;
-      }
-      this.scene.add(strip);
-    });
-  }
-
-  /**
-   * 创建单面墙
-   */
   createWall(config) {
     const { size, position, rotation } = config;
-
     const geometry = new THREE.BoxGeometry(...size);
     this._geometries.push(geometry);
 
@@ -208,11 +156,28 @@ export class ExhibitionHall {
   }
 
   /**
-   * 创建天花板
+   * 创建踢脚线 — 模拟真实展厅
    */
+  createBaseboard(wallConfigs) {
+    wallConfigs.forEach(config => {
+      const { size, position } = config;
+      const stripWidth = Math.max(size[0], size[2]);
+      const stripGeometry = new THREE.BoxGeometry(stripWidth, 0.12, 0.06);
+      this._geometries.push(stripGeometry);
+
+      const strip = new THREE.Mesh(stripGeometry, this.materials.edgeGlow);
+      if (size[2] < size[0]) {
+        strip.position.set(position[0], 0.06, position[2] > 0 ? position[2] + 0.15 : position[2] - 0.15);
+      } else {
+        strip.position.set(position[0] > 0 ? position[0] + 0.15 : position[0] - 0.15, 0.06, position[2]);
+        strip.rotation.y = Math.PI / 2;
+      }
+      this.scene.add(strip);
+    });
+  }
+
   createCeiling() {
     const { width, height, depth } = this.config;
-
     const geometry = new THREE.PlaneGeometry(width, depth);
     this._geometries.push(geometry);
 
@@ -220,20 +185,54 @@ export class ExhibitionHall {
     this.ceiling.position.y = height;
     this.ceiling.rotation.x = Math.PI / 2;
     this.scene.add(this.ceiling);
+
+    // 天花板灯带 — 模拟真实日光灯
+    this.createCeilingLights();
   }
 
   /**
-   * 创建装饰元素
+   * 天花板灯带 — 模拟真实展厅照明
    */
+  createCeilingLights() {
+    const { width, height, depth } = this.config;
+    const lightColor = 0xfff5e6; // 暖白色
+
+    // 灯带位置（3 排 × 3 列）
+    const rows = [-depth / 4, 0, depth / 4];
+    const cols = [-width / 4, 0, width / 4];
+
+    rows.forEach(z => {
+      cols.forEach(x => {
+        // 灯带几何体
+        const barGeometry = new THREE.BoxGeometry(3, 0.05, 0.3);
+        this._geometries.push(barGeometry);
+
+        const barMaterial = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          emissive: lightColor,
+          emissiveIntensity: 2.0,
+          roughness: 0.1,
+          metalness: 0.0
+        });
+        this._trackedMaterials.push(barMaterial);
+
+        const bar = new THREE.Mesh(barGeometry, barMaterial);
+        bar.position.set(x, height - 0.1, z);
+        this.scene.add(bar);
+
+        // 每个灯带配一个点光源
+        const pointLight = new THREE.PointLight(lightColor, 0.6, 12);
+        pointLight.position.set(x, height - 0.3, z);
+        this.scene.add(pointLight);
+      });
+    });
+  }
+
   createDecorations() {
     this.createEntrance();
     this.createExhibitionSigns();
-    this.createLightDecorations();
   }
 
-  /**
-   * 创建入口
-   */
   createEntrance() {
     const { depth } = this.config;
 
@@ -241,25 +240,21 @@ export class ExhibitionHall {
     this._geometries.push(doorFrameGeometry);
 
     const doorFrameMaterial = new THREE.MeshStandardMaterial({
-      color: 0x00d2ff,
-      roughness: 0.2,
-      metalness: 0.8,
-      emissive: 0x00d2ff,
-      emissiveIntensity: 0.6
+      color: 0x5b7fa5,
+      roughness: 0.3,
+      metalness: 0.6
     });
+    this._trackedMaterials.push(doorFrameMaterial);
 
     const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
     doorFrame.position.set(0, 1.75, depth / 2);
     this.scene.add(doorFrame);
 
     this.createTextSprite('数据安全服务展厅', {
-      x: 0, y: 3.5, z: depth / 2, size: 0.8, color: '#00d2ff'
+      x: 0, y: 3.8, z: depth / 2, size: 0.8, color: '#1a365d'
     });
   }
 
-  /**
-   * 创建展区标识
-   */
   createExhibitionSigns() {
     const { width, depth } = this.config;
 
@@ -276,38 +271,32 @@ export class ExhibitionHall {
         y: sign.position[1],
         z: sign.position[2],
         size: 0.5,
-        color: '#ffffff'
+        color: '#2c3e50'
       });
     });
   }
 
-  /**
-   * 创建文字精灵
-   * @param {string} text - 文字内容
-   * @param {Object} options - 配置选项
-   */
   createTextSprite(text, options) {
-    const { x, y, z, size = 1, color = '#ffffff' } = options;
+    const { x, y, z, size = 1, color = '#2c3e50' } = options;
 
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
     canvas.width = 512;
     canvas.height = 128;
 
-    // 绘制背景
-    context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    // 半透明白色背景
+    context.fillStyle = 'rgba(255, 255, 255, 0.85)';
     context.beginPath();
     context.roundRect(0, 0, canvas.width, canvas.height, 10);
     context.fill();
 
-    // 绘制文字
+    // 深色文字
     context.font = 'Bold 48px "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif';
     context.fillStyle = color;
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     context.fillText(text, canvas.width / 2, canvas.height / 2);
 
-    // 创建纹理并追踪
     const texture = new THREE.CanvasTexture(canvas);
     this._textures.push(texture);
 
@@ -325,208 +314,7 @@ export class ExhibitionHall {
   }
 
   /**
-   * 创建灯光装饰
-   */
-  createLightDecorations() {
-    const { width, height, depth } = this.config;
-
-    const lightPositions = [
-      { x: -width / 4, y: height - 0.5, z: -depth / 4 },
-      { x: width / 4, y: height - 0.5, z: -depth / 4 },
-      { x: -width / 4, y: height - 0.5, z: depth / 4 },
-      { x: width / 4, y: height - 0.5, z: depth / 4 }
-    ];
-
-    lightPositions.forEach(pos => {
-      const light = new THREE.PointLight(0x00d2ff, 1.5, 20);
-      light.position.set(pos.x, pos.y, pos.z);
-      this.scene.add(light);
-
-      const lightGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-      this._geometries.push(lightGeometry);
-
-      const lightMaterial = new THREE.MeshStandardMaterial({
-        color: 0x00d2ff,
-        emissive: 0x00d2ff,
-        emissiveIntensity: 2
-      });
-
-      const lightMesh = new THREE.Mesh(lightGeometry, lightMaterial);
-      lightMesh.position.set(pos.x, pos.y, pos.z);
-      this.scene.add(lightMesh);
-    });
-  }
-
-  /**
-   * 加载展示内容
-   * @param {Object} contentData - 内容数据
-   */
-  loadContent(contentData) {
-    if (!contentData || !contentData.exhibitions) {
-      console.warn('没有可加载的内容');
-      return;
-    }
-
-    contentData.exhibitions.forEach(exhibition => {
-      this.createExhibitionZone(exhibition);
-    });
-
-    console.log('展示内容加载完成');
-  }
-
-  /**
-   * 创建展区
-   * @param {Object} exhibition - 展区配置
-   */
-  createExhibitionZone(exhibition) {
-    const { id, name, description, position, panels } = exhibition;
-
-    const zone = new THREE.Group();
-    zone.position.set(position.x, position.y, position.z);
-    zone.userData = { id, name, description };
-
-    this.createTextSprite(name, {
-      x: 0, y: 3, z: 0, size: 0.6, color: '#00d2ff'
-    });
-
-    if (panels && panels.length > 0) {
-      panels.forEach((panelData, index) => {
-        const panel = this.createPanel(panelData, index, panels.length);
-        zone.add(panel);
-        this.panels.push(panel);
-      });
-    }
-
-    this.scene.add(zone);
-    this.exhibitions.push(zone);
-
-    return zone;
-  }
-
-  /**
-   * 创建展板
-   * @param {Object} panelData - 展板数据
-   * @param {number} index - 索引
-   * @param {number} total - 总数
-   * @returns {THREE.Group} 展板组
-   */
-  createPanel(panelData, index, total) {
-    const { id, type, title, description, tags, thumbnail, contentUrl } = panelData;
-
-    const panelGroup = new THREE.Group();
-    panelGroup.userData = {
-      id, type, title, description, tags, thumbnail, contentUrl, isPanel: true
-    };
-
-    const spacing = 3;
-    const startX = -(total - 1) * spacing / 2;
-    const x = startX + index * spacing;
-
-    // 展板底板
-    const boardGeometry = new THREE.BoxGeometry(2.5, 3.5, 0.1);
-    this._geometries.push(boardGeometry);
-
-    const board = new THREE.Mesh(boardGeometry, this.materials.panel);
-    board.position.set(x, 1.75, -0.05);
-    board.castShadow = true;
-    board.receiveShadow = true;
-    panelGroup.add(board);
-
-    // 展板边框
-    const borderGeometry = new THREE.EdgesGeometry(boardGeometry);
-    this._geometries.push(borderGeometry);
-
-    const borderMaterial = new THREE.LineBasicMaterial({
-      color: 0x00d2ff,
-      transparent: true,
-      opacity: 0.5
-    });
-    const border = new THREE.LineSegments(borderGeometry, borderMaterial);
-    border.position.copy(board.position);
-    panelGroup.add(border);
-
-    // 标题文字
-    this.createTextSprite(title, {
-      x: x, y: 3.8, z: 0, size: 0.3, color: '#ffffff'
-    });
-
-    // 类型图标
-    const icon = this.getTypeIcon(type);
-    this.createTextSprite(icon, {
-      x: x, y: 2.5, z: 0.1, size: 0.5, color: '#00d2ff'
-    });
-
-    // 交互区域（用于射线检测）
-    const hitboxGeometry = new THREE.BoxGeometry(2.5, 3.5, 0.5);
-    this._geometries.push(hitboxGeometry);
-
-    const hitboxMaterial = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-      side: THREE.DoubleSide
-    });
-    const hitbox = new THREE.Mesh(hitboxGeometry, hitboxMaterial);
-    hitbox.position.set(x, 1.75, 0.2);
-    hitbox.userData = panelGroup.userData;
-    panelGroup.add(hitbox);
-
-    return panelGroup;
-  }
-
-  /**
-   * 获取类型图标
-   */
-  getTypeIcon(type) {
-    const icons = {
-      document: '📄',
-      image: '🖼️',
-      video: '🎬',
-      chart: '📊',
-      model3d: '🧊'
-    };
-    return icons[type] || '📋';
-  }
-
-  /**
-   * 高亮展板
-   */
-  highlightPanel(panel) {
-    if (!panel) return;
-    panel.children.forEach(child => {
-      if (child.isMesh && child.material === this.materials.panel) {
-        child.material = this.materials.panelHover;
-      }
-    });
-  }
-
-  /**
-   * 取消高亮展板
-   */
-  unhighlightPanel(panel) {
-    if (!panel) return;
-    panel.children.forEach(child => {
-      if (child.isMesh && child.material === this.materials.panelHover) {
-        child.material = this.materials.panel;
-      }
-    });
-  }
-
-  /**
-   * 获取所有展板
-   */
-  getPanels() {
-    return this.panels;
-  }
-
-  /**
-   * 获取展区
-   */
-  getExhibition(id) {
-    return this.exhibitions.find(ex => ex.userData.id === id);
-  }
-
-  /**
-   * 创建入口粒子效果
+   * 入口粒子效果
    */
   createEntranceParticles() {
     const particleCount = 200;
@@ -552,10 +340,10 @@ export class ExhibitionHall {
     this._geometries.push(geometry);
 
     const material = new THREE.PointsMaterial({
-      color: 0x00d2ff,
-      size: 0.05,
+      color: 0x88bbdd,
+      size: 0.04,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.6,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -564,13 +352,9 @@ export class ExhibitionHall {
     this.particles = new THREE.Points(geometry, material);
     this.particles.userData.velocities = velocities;
     this.scene.add(this.particles);
-
     console.log('入口粒子效果创建完成');
   }
 
-  /**
-   * 更新粒子动画
-   */
   updateParticles() {
     if (!this.particles) return;
 
@@ -594,34 +378,155 @@ export class ExhibitionHall {
     this.particles.geometry.attributes.position.needsUpdate = true;
   }
 
-  /**
-   * 清理资源（Phase 3: 完整资源清理）
-   */
-  dispose() {
-    // 清理所有追踪的纹理
-    this._textures.forEach(texture => {
-      if (texture) texture.dispose();
+  loadContent(contentData) {
+    if (!contentData || !contentData.exhibitions) {
+      console.warn('没有可加载的内容');
+      return;
+    }
+
+    contentData.exhibitions.forEach(exhibition => {
+      this.createExhibitionZone(exhibition);
     });
+
+    console.log('展示内容加载完成');
+  }
+
+  createExhibitionZone(exhibition) {
+    const { id, name, description, position, panels } = exhibition;
+
+    const zone = new THREE.Group();
+    zone.position.set(position.x, position.y, position.z);
+    zone.userData = { id, name, description };
+
+    this.createTextSprite(name, {
+      x: 0, y: 3.2, z: 0, size: 0.6, color: '#1a365d'
+    });
+
+    if (panels && panels.length > 0) {
+      panels.forEach((panelData, index) => {
+        const panel = this.createPanel(panelData, index, panels.length);
+        zone.add(panel);
+        this.panels.push(panel);
+      });
+    }
+
+    this.scene.add(zone);
+    this.exhibitions.push(zone);
+    return zone;
+  }
+
+  createPanel(panelData, index, total) {
+    const { id, type, title, description, tags, thumbnail, contentUrl } = panelData;
+
+    const panelGroup = new THREE.Group();
+    panelGroup.userData = {
+      id, type, title, description, tags, thumbnail, contentUrl, isPanel: true
+    };
+
+    const spacing = 3;
+    const startX = -(total - 1) * spacing / 2;
+    const x = startX + index * spacing;
+
+    // 展板底板
+    const boardGeometry = new THREE.BoxGeometry(2.5, 3.5, 0.1);
+    this._geometries.push(boardGeometry);
+
+    const board = new THREE.Mesh(boardGeometry, this.materials.panel);
+    board.position.set(x, 1.75, -0.05);
+    board.castShadow = true;
+    board.receiveShadow = true;
+    panelGroup.add(board);
+
+    // 展板边框（金属银色）
+    const borderGeometry = new THREE.EdgesGeometry(boardGeometry);
+    this._geometries.push(borderGeometry);
+
+    const borderMaterial = new THREE.LineBasicMaterial({
+      color: 0x8b9dc3,
+      transparent: true,
+      opacity: 0.6
+    });
+    this._trackedMaterials.push(borderMaterial);
+    const border = new THREE.LineSegments(borderGeometry, borderMaterial);
+    border.position.copy(board.position);
+    panelGroup.add(border);
+
+    // 标题文字
+    this.createTextSprite(title, {
+      x: x, y: 3.8, z: 0, size: 0.3, color: '#1a365d'
+    });
+
+    // 类型图标
+    const icon = this.getTypeIcon(type);
+    this.createTextSprite(icon, {
+      x: x, y: 2.5, z: 0.1, size: 0.5, color: '#2c3e50'
+    });
+
+    // 交互区域（用于射线检测）
+    const hitboxGeometry = new THREE.BoxGeometry(2.5, 3.5, 0.5);
+    this._geometries.push(hitboxGeometry);
+
+    const hitboxMaterial = new THREE.MeshBasicMaterial({
+      transparent: true,
+      opacity: 0,
+      side: THREE.DoubleSide
+    });
+    this._trackedMaterials.push(hitboxMaterial);
+    const hitbox = new THREE.Mesh(hitboxGeometry, hitboxMaterial);
+    hitbox.position.set(x, 1.75, 0.2);
+    hitbox.userData = panelGroup.userData;
+    panelGroup.add(hitbox);
+
+    return panelGroup;
+  }
+
+  getTypeIcon(type) {
+    const icons = {
+      document: '📄',
+      image: '🖼️',
+      video: '🎬',
+      chart: '📊',
+      model3d: '🧊'
+    };
+    return icons[type] || '📋';
+  }
+
+  highlightPanel(panel) {
+    if (!panel) return;
+    panel.children.forEach(child => {
+      if (child.isMesh && child.material === this.materials.panel) {
+        child.material = this.materials.panelHover;
+      }
+    });
+  }
+
+  unhighlightPanel(panel) {
+    if (!panel) return;
+    panel.children.forEach(child => {
+      if (child.isMesh && child.material === this.materials.panelHover) {
+        child.material = this.materials.panel;
+      }
+    });
+  }
+
+  getPanels() { return this.panels; }
+
+  getExhibition(id) {
+    return this.exhibitions.find(ex => ex.userData.id === id);
+  }
+
+  dispose() {
+    this._textures.forEach(texture => { if (texture) texture.dispose(); });
     this._textures = [];
 
-    // 清理所有追踪的几何体
-    this._geometries.forEach(geometry => {
-      if (geometry) geometry.dispose();
-    });
+    this._geometries.forEach(geometry => { if (geometry) geometry.dispose(); });
     this._geometries = [];
 
-    // 清理追踪的材质
-    this._trackedMaterials.forEach(material => {
-      if (material) material.dispose();
-    });
+    this._trackedMaterials.forEach(material => { if (material) material.dispose(); });
     this._trackedMaterials = [];
 
-    // 清理材质
-    Object.values(this.materials).forEach(material => {
-      if (material) material.dispose();
-    });
+    Object.values(this.materials).forEach(material => { if (material) material.dispose(); });
 
-    // 清理粒子系统
     if (this.particles) {
       this.scene.remove(this.particles);
       this.particles = null;
