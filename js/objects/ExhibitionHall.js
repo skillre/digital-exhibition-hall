@@ -118,10 +118,15 @@ export class ExhibitionHall {
     this.floor.rotation.x = -Math.PI / 2;
     this.floor.position.y = 0;
     this.scene.add(this.floor);
-    // 叠加深色半透明面（让反射不会过亮，且可受阴影）
+    // 叠加半透明深色面（让反射可见但不过亮）
     const overlayGeo = new THREE.PlaneGeometry(width, depth);
     this._geometries.push(overlayGeo);
-    const overlay = new THREE.Mesh(overlayGeo, this.materials.floor);
+    const overlayMat = new THREE.MeshStandardMaterial({
+      color: THEME.floor.color, roughness: 0.3, metalness: 0.6,
+      transparent: true, opacity: 0.35, envMapIntensity: 0.8
+    });
+    this._trackedMaterials.push(overlayMat);
+    const overlay = new THREE.Mesh(overlayGeo, overlayMat);
     overlay.rotation.x = -Math.PI / 2;
     overlay.position.y = 0.005;
     overlay.receiveShadow = true;
