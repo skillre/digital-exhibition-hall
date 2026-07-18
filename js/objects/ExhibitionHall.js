@@ -56,46 +56,37 @@ export class ExhibitionHall {
   // ===== 真实材质 =====
 
   initMaterials() {
-    // 地面：深色石材大理石
+    // 地面：深蓝灰石材大理石
     const floorTex = this.createProceduralTexture(1024, 1024, (ctx, w, h) => {
       const bg = ctx.createLinearGradient(0, 0, w, h);
-      bg.addColorStop(0, '#2e2c26'); bg.addColorStop(1, '#3a3830');
+      bg.addColorStop(0, '#1e2a3c'); bg.addColorStop(1, '#243044');
       ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
-      // 石材纹理 — 大面积不规则线条
       for (let i = 0; i < 120; i++) {
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(80,76,62,${0.1 + Math.random() * 0.2})`;
+        ctx.strokeStyle = `rgba(60,80,110,${0.1 + Math.random() * 0.2})`;
         ctx.lineWidth = 0.5 + Math.random() * 2.5;
         let x = Math.random() * w, y = Math.random() * h;
         ctx.moveTo(x, y);
-        for (let j = 0; j < 8; j++) {
-          x += (Math.random() - 0.5) * 150; y += (Math.random() - 0.5) * 150;
-          ctx.lineTo(x, y);
-        }
+        for (let j = 0; j < 8; j++) { x += (Math.random() - 0.5) * 150; y += (Math.random() - 0.5) * 150; ctx.lineTo(x, y); }
         ctx.stroke();
       }
-      // 石材颗粒
       for (let i = 0; i < 3000; i++) {
         const px = Math.random() * w, py = Math.random() * h;
-        const v = 40 + Math.random() * 30;
-        ctx.fillStyle = `rgba(${v},${v - 4},${v - 10},${0.15 + Math.random() * 0.2})`;
+        const v = 30 + Math.random() * 25;
+        ctx.fillStyle = `rgba(${v},${v + 8},${v + 20},${0.15 + Math.random() * 0.2})`;
         ctx.fillRect(px, py, 1, 1);
       }
-      // 大理石白色纹理
+      // 大理石纹理
       for (let i = 0; i < 25; i++) {
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(200,195,180,${0.04 + Math.random() * 0.06})`;
+        ctx.strokeStyle = `rgba(150,180,210,${0.03 + Math.random() * 0.05})`;
         ctx.lineWidth = 1 + Math.random() * 3;
         let x = Math.random() * w, y = Math.random() * h;
         ctx.moveTo(x, y);
-        for (let j = 0; j < 12; j++) {
-          x += (Math.random() - 0.5) * 120; y += (Math.random() - 0.5) * 120;
-          ctx.lineTo(x, y);
-        }
+        for (let j = 0; j < 12; j++) { x += (Math.random() - 0.5) * 120; y += (Math.random() - 0.5) * 120; ctx.lineTo(x, y); }
         ctx.stroke();
       }
-      // 缝隙线（大块石材拼接）
-      ctx.strokeStyle = 'rgba(20,18,14,0.6)'; ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(10,14,22,0.6)'; ctx.lineWidth = 3;
       const tileSize = w / 4;
       for (let x = 0; x <= w; x += tileSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
       for (let y = 0; y <= h; y += tileSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
@@ -106,21 +97,19 @@ export class ExhibitionHall {
       metalness: 0.05, envMapIntensity: 0.6,
     });
 
-    // 墙面：暖白漆面（带轻微纹理）
+    // 墙面：冷白蓝漆面
     const wallTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
-      ctx.fillStyle = '#d8d4cc'; ctx.fillRect(0, 0, w, h);
-      // 漆面细微噪点
+      ctx.fillStyle = '#c8d8e8'; ctx.fillRect(0, 0, w, h);
       for (let i = 0; i < 4000; i++) {
         const px = Math.random() * w, py = Math.random() * h;
-        const v = 200 + Math.random() * 30;
-        ctx.fillStyle = `rgba(${v},${v - 4},${v - 12},${0.05 + Math.random() * 0.08})`;
+        const v = 190 + Math.random() * 25;
+        ctx.fillStyle = `rgba(${v - 10},${v},${v + 5},${0.05 + Math.random() * 0.08})`;
         ctx.fillRect(px, py, 1, 1);
       }
-      // 轻微阴影渐变（上深下浅）
       const grad = ctx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, 'rgba(40,38,30,0.06)');
+      grad.addColorStop(0, 'rgba(30,42,60,0.06)');
       grad.addColorStop(0.5, 'rgba(0,0,0,0)');
-      grad.addColorStop(1, 'rgba(40,38,30,0.04)');
+      grad.addColorStop(1, 'rgba(30,42,60,0.04)');
       ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
     });
     wallTex.repeat.set(2, 1);
@@ -129,18 +118,16 @@ export class ExhibitionHall {
       metalness: 0.0, envMapIntensity: 0.15,
     });
 
-    // 天花板：白色天花板
+    // 天花板：冷白方格
     const ceilTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
-      ctx.fillStyle = '#f0ede8'; ctx.fillRect(0, 0, w, h);
-      // 天花板方格线
-      ctx.strokeStyle = 'rgba(160,156,148,0.3)'; ctx.lineWidth = 2;
+      ctx.fillStyle = '#e8eef4'; ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(140,160,180,0.3)'; ctx.lineWidth = 2;
       const tileSize = w / 4;
       for (let x = 0; x <= w; x += tileSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
       for (let y = 0; y <= h; y += tileSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-      // 细微纹理
       for (let i = 0; i < 2000; i++) {
         const px = Math.random() * w, py = Math.random() * h;
-        ctx.fillStyle = `rgba(230,226,218,${0.1 + Math.random() * 0.1})`;
+        ctx.fillStyle = `rgba(220,228,238,${0.1 + Math.random() * 0.1})`;
         ctx.fillRect(px, py, 1, 1);
       }
     });
@@ -150,13 +137,12 @@ export class ExhibitionHall {
       metalness: 0.0, envMapIntensity: 0.1,
     });
 
-    // 踢脚线 — 白色木质
+    // 踢脚线/顶线 — 冷白蓝
     this.materials.baseboard = new THREE.MeshStandardMaterial({
-      color: 0xf0ede8, roughness: 0.6, metalness: 0.0, envMapIntensity: 0.2
+      color: 0xe0e8f0, roughness: 0.6, metalness: 0.0, envMapIntensity: 0.2
     });
-    // 顶线/门框 — 白色木质
     this.materials.trim = new THREE.MeshStandardMaterial({
-      color: 0xf5f2ee, roughness: 0.5, metalness: 0.0, envMapIntensity: 0.25
+      color: 0xe8eef4, roughness: 0.5, metalness: 0.0, envMapIntensity: 0.25
     });
 
     // 展板：半透明玻璃数据屏（数字化元素）
@@ -268,7 +254,7 @@ export class ExhibitionHall {
 
   createCeilingLights() {
     const { width, height, depth } = this.config;
-    const lightColor = 0xfff8ee;
+    const lightColor = 0xeef4ff;
     const rows = [-depth / 4, 0, depth / 4];
     const cols = [-width / 4, 0, width / 4];
     rows.forEach(z => cols.forEach(x => {

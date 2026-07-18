@@ -5,28 +5,28 @@
 
 // 视觉设计令牌
 export const THEME = {
-  // 基调 — 真实展厅色彩
-  bgDeep: 0x1a1a1e,        // 暖灰深色 — 远景/雾
-  surfaceDark: 0xd8d4cc,   // 暖白墙面
-  surfaceMid: 0xf0ede8,    // 白色天花板
-  // 强调 — 数字化点缀（仅用于展板/粒子/HUD）
+  // 基调 — 科技蓝白色系
+  bgDeep: 0x0a1420,        // 深蓝灰 — 远景/雾
+  surfaceDark: 0xc8d8e8,   // 冷白蓝墙面
+  surfaceMid: 0xe8eef4,    // 冷白天花板
+  // 强调 — 数字化点缀
   neon: 0x00d2ff,          // 青色霓虹
   ice: 0x0088ff,           // 冰蓝
   // 点缀
   safe: 0x00ff88,
   threat: 0xff00aa,
-  // 材质参数 — 真实质感
-  floor: { color: 0x2a2820, roughness: 0.15, metalness: 0.05, envMapIntensity: 0.6 },
-  wall: { color: 0xd8d4cc, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.2 },
+  // 材质参数
+  floor: { color: 0x1a2438, roughness: 0.18, metalness: 0.1, envMapIntensity: 0.6 },
+  wall: { color: 0xc8d8e8, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.2 },
   panel: { color: 0x0a1628, emissive: 0x00d2ff, emissiveIntensity: 0.6 },
-  // 灯光 — 白色日光灯（真实展厅照明）
-  ambient: { color: 0xf0ece4, intensity: 0.7 },
+  // 灯光 — 冷白日光灯
+  ambient: { color: 0xe0e8f0, intensity: 0.7 },
   directional: { color: 0xffffff, intensity: 1.0 },
-  hemisphere: { sky: 0xf5f2ee, ground: 0x2a2820, intensity: 0.5 },
+  hemisphere: { sky: 0xeef4f8, ground: 0x1a2438, intensity: 0.5 },
   accent: { color: 0x00d2ff, intensity: 1.5 },
   // 雾
-  fog: { color: 0x1a1a1e, density: 0.002 },
-  // 后处理 — 轻微 Bloom 只让数字元素发光
+  fog: { color: 0x0a1420, density: 0.002 },
+  // 后处理
   bloom: { strength: 0.4, radius: 0.3, threshold: 0.75 },
 };
 
