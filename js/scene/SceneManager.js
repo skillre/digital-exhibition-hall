@@ -1,10 +1,11 @@
 /**
  * 场景管理器
- * 负责创建和管理 Three.js 场景、相机、渲染器
- * 视觉风格：拟物感 — 模拟真实展厅环境
+ * 视觉风格：高质量拟物感展厅
+ * 核心技术：RoomEnvironment 环境贴图 + PBR 材质 + 后处理
  */
 
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
@@ -28,6 +29,7 @@ export class SceneManager {
     this.createScene();
     this.createCamera();
     this.createRenderer();
+    this.createEnvironment();
     this.createLighting();
     this.createPostProcessing();
     console.log('场景管理器初始化完成');
@@ -67,30 +69,47 @@ export class SceneManager {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.toneMapping = THREE.LinearToneMapping;
-    this.renderer.toneMappingExposure = 1.0;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 0.8;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
   /**
-   * 创建灯光 — 模拟真实展厅照明
+   * 创建环境贴图 — 这是真实感的核心
+   * RoomEnvironment 生成一个简单的室内环境，让金属/光泽表面有东西可以反射
+   */
+  createEnvironment() {
+    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    pmremGenerator.compileEquirectangularShader();
+
+    const roomEnv = new RoomEnvironment();
+    const envTexture = pmremGenerator.fromScene(roomEnv).texture;
+
+    this.scene.environment = envTexture;
+    roomEnv.dispose();
+    pmremGenerator.dispose();
+
+    console.log('环境贴图生成完成');
+  }
+
+  /**
+   * 创建灯光
    */
   createLighting() {
-    // 环境光：模拟墙壁、天花板反射的均匀光
+    // 环境光：低强度补光
     const ambientLight = new THREE.AmbientLight(
       this.lightingConfig.ambient.color,
       this.lightingConfig.ambient.intensity
     );
     this.scene.add(ambientLight);
 
-    // 方向光：模拟从窗户/天窗进来的自然光
+    // 主方向光
     const directionalLight = new THREE.DirectionalLight(
       this.lightingConfig.directional.color,
       this.lightingConfig.directional.intensity
     );
     const { x, y, z } = this.lightingConfig.directional.position;
     directionalLight.position.set(x, y, z);
-
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 2048;
     directionalLight.shadow.mapSize.height = 2048;
@@ -101,37 +120,33 @@ export class SceneManager {
     directionalLight.shadow.camera.top = 25;
     directionalLight.shadow.camera.bottom = -25;
     directionalLight.shadow.bias = -0.0005;
-
     this.scene.add(directionalLight);
 
-    // 半球光：天空蓝 + 地面暖色，模拟户外反射
+    // 半球光：天空+地面反射
     const hemisphereLight = new THREE.HemisphereLight(0xddeeff, 0x998877, 0.5);
     this.scene.add(hemisphereLight);
 
-    // 补光：从反方向照，消除死角
-    const fillLight = new THREE.DirectionalLight(0xfff0dd, 0.4);
+    // 补光
+    const fillLight = new THREE.DirectionalLight(0xfff0dd, 0.3);
     fillLight.position.set(-5, 8, -5);
     this.scene.add(fillLight);
   }
 
   /**
-   * 后处理 — 轻度 Bloom，不做压暗处理
+   * 后处理：轻度 Bloom
    */
   createPostProcessing() {
     const size = new THREE.Vector2();
     this.renderer.getSize(size);
 
     this.composer = new EffectComposer(this.renderer);
+    this.composer.addPass(new RenderPass(this.scene, this.camera));
 
-    const renderPass = new RenderPass(this.scene, this.camera);
-    this.composer.addPass(renderPass);
-
-    // 轻度 Bloom：只让灯带等高亮物体微微发光
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(size.x, size.y),
-      0.2,  // strength — 很轻
-      0.5,  // radius — 大范围柔光
-      0.8   // threshold — 只有最亮的才发光
+      0.15,  // strength — 非常轻
+      0.4,   // radius
+      0.85   // threshold — 只有灯带等最亮物体才发光
     );
     this.composer.addPass(bloomPass);
 
