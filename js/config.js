@@ -19,11 +19,11 @@ export const THEME = {
   floor: { color: 0x253a58, roughness: 0.25, metalness: 0.3, envMapIntensity: 1.5 },
   wall: { color: 0x2a4468, roughness: 0.5, metalness: 0.1, envMapIntensity: 0.8 },
   panel: { color: 0x0a1628, emissive: 0x00d2ff, emissiveIntensity: 0.6 },
-  // 灯光 — 保持足够强度
-  ambient: { color: 0x8899bb, intensity: 1.5 },
-  directional: { color: 0xccddee, intensity: 2.0 },
-  hemisphere: { sky: 0x7799bb, ground: 0x253a58, intensity: 1.0 },
-  accent: { color: 0x00d2ff, intensity: 3.0 },
+  // 灯光 — 冷暖混合，更自然的 VR 感
+  ambient: { color: 0x8899bb, intensity: 1.2 },
+  directional: { color: 0xccddee, intensity: 1.8 },
+  hemisphere: { sky: 0x8899aa, ground: 0x253a58, intensity: 0.8 },
+  accent: { color: 0x00d2ff, intensity: 2.5 },
   // 雾
   fog: { color: 0x0c1828, density: 0.003 },
   // 后处理

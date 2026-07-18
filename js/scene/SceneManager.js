@@ -140,6 +140,14 @@ export class SceneManager {
     const accent = new THREE.PointLight(ac.color, ac.intensity, 30);
     accent.position.set(0, 6, 0);
     this.scene.add(accent);
+
+    // 暖色补光 — 增加自然感
+    const warmFill = new THREE.PointLight(0xffeedd, 0.6, 25);
+    warmFill.position.set(-8, 4, 5);
+    this.scene.add(warmFill);
+    const warmFill2 = new THREE.PointLight(0xffeedd, 0.4, 20);
+    warmFill2.position.set(8, 4, -5);
+    this.scene.add(warmFill2);
   }
 
   /**

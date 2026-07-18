@@ -68,18 +68,74 @@ export class ExhibitionHall {
   // ===== Slice 3: 科技空间骨架 =====
 
   initMaterials() {
-    // 深色镜面地面材质（Reflector 主反射 + 叠加深色半透明）
-    // PBR 材质 — 需要足够灯光
+    // 地面：深色石纹 + 微反射
+    const floorTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
+      const bg = ctx.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0, '#1a2840'); bg.addColorStop(1, '#1e2e48');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      // 石纹纹理
+      for (let i = 0; i < 80; i++) {
+        ctx.beginPath(); ctx.strokeStyle = `rgba(60,80,110,${0.08 + Math.random() * 0.12})`;
+        ctx.lineWidth = 0.5 + Math.random() * 2;
+        let x = Math.random() * w, y = Math.random() * h;
+        ctx.moveTo(x, y);
+        for (let j = 0; j < 5; j++) { x += (Math.random() - 0.5) * 100; y += (Math.random() - 0.5) * 100; ctx.lineTo(x, y); }
+        ctx.stroke();
+      }
+      // 网格线
+      ctx.strokeStyle = 'rgba(0,210,255,0.06)'; ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 64) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+      for (let y = 0; y < h; y += 64) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+    });
+    floorTex.repeat.set(8, 8);
     this.materials.floor = new THREE.MeshStandardMaterial({
-      color: THEME.floor.color, roughness: THEME.floor.roughness,
+      map: floorTex, color: THEME.floor.color, roughness: THEME.floor.roughness,
       metalness: THEME.floor.metalness, envMapIntensity: THEME.floor.envMapIntensity
     });
+
+    // 墙面：暗纹面板 + 嵌入线条
+    const wallTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#223850'); bg.addColorStop(0.5, '#2a4468'); bg.addColorStop(1, '#1e3050');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
+      // 面板分割线
+      ctx.strokeStyle = 'rgba(0,210,255,0.12)'; ctx.lineWidth = 2;
+      ctx.strokeRect(20, 20, w - 40, h - 40);
+      ctx.strokeStyle = 'rgba(0,210,255,0.06)'; ctx.lineWidth = 1;
+      const panelH = h / 4;
+      for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(20, i * panelH); ctx.lineTo(w - 20, i * panelH); ctx.stroke(); }
+      // 细微噪点
+      for (let i = 0; i < 1500; i++) {
+        const px = Math.random() * w, py = Math.random() * h;
+        ctx.fillStyle = `rgba(80,110,150,${0.03 + Math.random() * 0.05})`;
+        ctx.fillRect(px, py, 1, 1);
+      }
+    });
+    wallTex.repeat.set(4, 2);
     this.materials.wall = new THREE.MeshStandardMaterial({
-      color: THEME.wall.color, roughness: THEME.wall.roughness,
+      map: wallTex, color: THEME.wall.color, roughness: THEME.wall.roughness,
       metalness: THEME.wall.metalness, envMapIntensity: THEME.wall.envMapIntensity
     });
+
+    // 天花板：方格面板
+    const ceilTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
+      ctx.fillStyle = '#253a58'; ctx.fillRect(0, 0, w, h);
+      // 方格线
+      ctx.strokeStyle = 'rgba(0,210,255,0.1)'; ctx.lineWidth = 2;
+      const tileSize = w / 4;
+      for (let x = 0; x <= w; x += tileSize) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+      for (let y = 0; y <= h; y += tileSize) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+      // 面板中心微光点
+      for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+        const cx = (i + 0.5) * tileSize, cy = (j + 0.5) * tileSize;
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, tileSize * 0.3);
+        grad.addColorStop(0, 'rgba(0,210,255,0.08)'); grad.addColorStop(1, 'rgba(0,210,255,0)');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h);
+      }
+    });
+    ceilTex.repeat.set(4, 4);
     this.materials.ceiling = new THREE.MeshStandardMaterial({
-      color: THEME.surfaceMid, roughness: 0.8, metalness: 0.1, envMapIntensity: 0.2
+      map: ceilTex, color: THEME.surfaceMid, roughness: 0.7, metalness: 0.1, envMapIntensity: 0.3
     });
     // 展板：半透明玻璃数据屏（Slice 5 细化）
     this.materials.panel = new THREE.MeshPhysicalMaterial({
