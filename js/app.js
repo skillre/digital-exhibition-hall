@@ -1,11 +1,13 @@
 /**
  * 数字展厅主入口文件（ES Module）
  * 负责初始化应用和协调各模块
+ * 视觉风格：深蓝赛博 Cyber Blue
  */
 
 import { CONFIG, AppState } from './config.js';
 import { SceneManager } from './scene/SceneManager.js';
 import { ExhibitionHall } from './objects/ExhibitionHall.js';
+import { TechCenterpiece } from './objects/TechCenterpiece.js';
 import { PlayerControls } from './controls/PlayerControls.js';
 import { InteractionSystem } from './interaction/InteractionSystem.js';
 import { UIManager } from './ui/UIManager.js';
@@ -15,6 +17,7 @@ import { AutoTourMode } from './controls/AutoTourMode.js';
 // 模块实例
 let sceneManager = null;
 let exhibitionHall = null;
+let techCenterpiece = null;
 let playerControls = null;
 let interactionSystem = null;
 let uiManager = null;
@@ -44,6 +47,10 @@ async function initApp() {
     // 创建展厅
     exhibitionHall = new ExhibitionHall(CONFIG.exhibition);
     exhibitionHall.create(sceneManager.scene);
+
+    // 创建中央装置
+    techCenterpiece = new TechCenterpiece();
+    techCenterpiece.create(sceneManager.scene, { x: 0, y: 3, z: 0 });
 
     updateLoadingProgress(50, '初始化控制...');
 
@@ -186,9 +193,14 @@ function startRenderLoop() {
       playerControls.update();
     }
 
-    // 更新粒子动画
+    // 更新粒子动画 + 环境动效（传入 elapsed 时间）
     if (exhibitionHall) {
-      exhibitionHall.updateParticles();
+      exhibitionHall.updateParticles(sceneManager.clock.getElapsedTime());
+    }
+
+    // 更新中央装置
+    if (techCenterpiece) {
+      techCenterpiece.update(sceneManager.clock.getElapsedTime());
     }
 
     // 更新小地图
@@ -244,6 +256,7 @@ window.App = {
   state: AppState,
   sceneManager: () => sceneManager,
   exhibitionHall: () => exhibitionHall,
+  techCenterpiece: () => techCenterpiece,
   playerControls: () => playerControls,
   interactionSystem: () => interactionSystem,
   uiManager: () => uiManager,

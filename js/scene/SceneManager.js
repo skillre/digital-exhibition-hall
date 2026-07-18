@@ -1,14 +1,15 @@
 /**
  * 场景管理器
- * 视觉风格：高质量拟物感展厅
- * 核心技术：RoomEnvironment 环境贴图 + PBR 材质 + 后处理
+ * 视觉风格：深蓝赛博 Cyber Blue
+ * 核心技术：暗色科技环境贴图 + PBR 材质 + Bloom + 扫描线后处理
  */
 
 import * as THREE from 'three';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { THEME } from '../config.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 
 export class SceneManager {
   constructor(sceneConfig, cameraConfig, lightingConfig) {
@@ -38,13 +39,13 @@ export class SceneManager {
   createScene() {
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(this.sceneConfig.backgroundColor);
-
     if (this.sceneConfig.fog.enabled) {
-      this.scene.fog = new THREE.Fog(
-        this.sceneConfig.fog.color,
-        this.sceneConfig.fog.near,
-        this.sceneConfig.fog.far
-      );
+      const f = this.sceneConfig.fog;
+      if (f.type === 'exp2') {
+        this.scene.fog = new THREE.FogExp2(f.color, f.density);
+      } else {
+        this.scene.fog = new THREE.Fog(f.color, f.near, f.far);
+      }
     }
   }
 
@@ -70,70 +71,78 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 0.8;
+    this.renderer.toneMappingExposure = 1.0;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
   /**
-   * 创建环境贴图 — 这是真实感的核心
-   * RoomEnvironment 生成一个简单的室内环境，让金属/光泽表面有东西可以反射
+   * 创建暗色科技环境贴图 — 为金属/玻璃表面提供反射内容（深色底 + 青色高光面）
    */
   createEnvironment() {
     const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
     pmremGenerator.compileEquirectangularShader();
-
-    const roomEnv = new RoomEnvironment();
-    const envTexture = pmremGenerator.fromScene(roomEnv).texture;
-
+    // 自建暗色科技环境场景
+    const envScene = new THREE.Scene();
+    envScene.background = new THREE.Color(THEME.bgDeep);
+    const panelGeo = new THREE.PlaneGeometry(10, 10);
+    const glow = new THREE.MeshBasicMaterial({ color: THEME.neon });
+    const ice = new THREE.MeshBasicMaterial({ color: THEME.ice });
+    const dark = new THREE.MeshBasicMaterial({ color: THEME.surfaceDark });
+    const faces = [
+      { mat: dark, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
+      { mat: dark, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
+      { mat: glow, pos: [0, 0, -5], rot: [0, 0, 0] },
+      { mat: dark, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
+      { mat: ice, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
+      { mat: dark, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
+    ];
+    faces.forEach(f => {
+      const m = new THREE.Mesh(panelGeo, f.mat);
+      m.position.set(...f.pos);
+      m.rotation.set(...f.rot);
+      envScene.add(m);
+    });
+    const envTexture = pmremGenerator.fromScene(envScene).texture;
     this.scene.environment = envTexture;
-    roomEnv.dispose();
+    envScene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+    panelGeo.dispose();
     pmremGenerator.dispose();
-
-    console.log('环境贴图生成完成');
+    console.log('暗色科技环境贴图生成完成');
   }
 
   /**
-   * 创建灯光
+   * 创建灯光 — 暗冷色 + 青色补光
    */
   createLighting() {
-    // 环境光：低强度补光
-    const ambientLight = new THREE.AmbientLight(
-      this.lightingConfig.ambient.color,
-      this.lightingConfig.ambient.intensity
-    );
-    this.scene.add(ambientLight);
+    const a = this.lightingConfig.ambient;
+    this.scene.add(new THREE.AmbientLight(a.color, a.intensity));
 
-    // 主方向光
-    const directionalLight = new THREE.DirectionalLight(
-      this.lightingConfig.directional.color,
-      this.lightingConfig.directional.intensity
-    );
-    const { x, y, z } = this.lightingConfig.directional.position;
-    directionalLight.position.set(x, y, z);
-    directionalLight.castShadow = true;
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
-    directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 50;
-    directionalLight.shadow.camera.left = -25;
-    directionalLight.shadow.camera.right = 25;
-    directionalLight.shadow.camera.top = 25;
-    directionalLight.shadow.camera.bottom = -25;
-    directionalLight.shadow.bias = -0.0005;
-    this.scene.add(directionalLight);
+    const d = this.lightingConfig.directional;
+    const dir = new THREE.DirectionalLight(d.color, d.intensity);
+    dir.position.set(d.position.x, d.position.y, d.position.z);
+    dir.castShadow = true;
+    dir.shadow.mapSize.width = 2048;
+    dir.shadow.mapSize.height = 2048;
+    dir.shadow.camera.near = 0.5;
+    dir.shadow.camera.far = 50;
+    dir.shadow.camera.left = -25;
+    dir.shadow.camera.right = 25;
+    dir.shadow.camera.top = 25;
+    dir.shadow.camera.bottom = -25;
+    dir.shadow.bias = -0.0005;
+    this.scene.add(dir);
 
-    // 半球光：天空+地面反射
-    const hemisphereLight = new THREE.HemisphereLight(0xddeeff, 0x998877, 0.5);
-    this.scene.add(hemisphereLight);
+    const h = this.lightingConfig.hemisphere;
+    this.scene.add(new THREE.HemisphereLight(h.sky, h.ground, h.intensity));
 
-    // 补光
-    const fillLight = new THREE.DirectionalLight(0xfff0dd, 0.3);
-    fillLight.position.set(-5, 8, -5);
-    this.scene.add(fillLight);
+    const ac = this.lightingConfig.accent;
+    const accent = new THREE.PointLight(ac.color, ac.intensity, 30);
+    accent.position.set(0, 6, 0);
+    this.scene.add(accent);
   }
 
   /**
-   * 后处理：轻度 Bloom
+   * 后处理：Bloom + 扫描线
    */
   createPostProcessing() {
     const size = new THREE.Vector2();
@@ -144,11 +153,21 @@ export class SceneManager {
 
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(size.x, size.y),
-      0.15,  // strength — 非常轻
-      0.4,   // radius
-      0.85   // threshold — 只有灯带等最亮物体才发光
+      THEME.bloom.strength,   // 1.0
+      THEME.bloom.radius,    // 0.5
+      THEME.bloom.threshold  // 0.3
     );
     this.composer.addPass(bloomPass);
+
+    // 扫描线后处理 pass（D7 轻扫描线）
+    const ScanlineShader = {
+      uniforms: { tDiffuse: { value: null }, opacity: { value: 0.06 } },
+      vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `uniform sampler2D tDiffuse; uniform float opacity; varying vec2 vUv; void main(){ vec4 c = texture2D(tDiffuse, vUv); float s = sin(vUv.y * 800.0) * 0.5 + 0.5; c.rgb -= s * opacity; gl_FragColor = c; }`,
+    };
+    const scanlinePass = new ShaderPass(ScanlineShader);
+    this.composer.addPass(scanlinePass);
+    this._scanlinePass = scanlinePass;
 
     console.log('后处理管线初始化完成');
   }
