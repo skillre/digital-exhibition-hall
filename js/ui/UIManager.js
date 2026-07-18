@@ -433,11 +433,11 @@ export class UIManager {
 
   navigateTo(target) {
     const positions = {
-      home: { x: 0, y: 0, z: 5 },
-      plans: { x: -10, y: 0, z: 0 },
-      cases: { x: 10, y: 0, z: 0 },
-      training: { x: 0, y: 0, z: -10 },
-      docs: { x: 0, y: 0, z: 10 }
+      home: { x: 0, y: 0, z: 14 },
+      plans: { x: -11, y: 0, z: 0 },
+      cases: { x: 11, y: 0, z: 0 },
+      training: { x: 0, y: 0, z: -11 },
+      docs: { x: 0, y: 0, z: 11 }
     };
 
     const position = positions[target];

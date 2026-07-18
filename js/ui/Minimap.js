@@ -3,7 +3,7 @@ import * as THREE from 'three';
 /**
  * 小地图
  * 使用 2D canvas 绘制展厅俯视图和玩家位置
- * Phase 6: 支持点击传送
+ * 深色科技主题
  */
 
 export class Minimap {
@@ -103,8 +103,8 @@ export class Minimap {
     // 清空画布
     ctx.clearRect(0, 0, width, height);
 
-    // 绘制背景
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    // 深色背景
+    ctx.fillStyle = 'rgba(8, 12, 20, 0.95)';
     ctx.fillRect(0, 0, width, height);
 
     // 绘制展厅边界
@@ -131,25 +131,20 @@ export class Minimap {
     const x = this.offsetX - w / 2;
     const y = this.offsetY - h / 2;
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    // 蓝色边框
+    ctx.strokeStyle = 'rgba(10, 132, 255, 0.4)';
     ctx.lineWidth = 1;
     ctx.strokeRect(x, y, w, h);
 
-    // 绘制网格
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    // 网格
+    ctx.strokeStyle = 'rgba(10, 132, 255, 0.08)';
     ctx.lineWidth = 0.5;
     const gridSize = 5 * this.scale;
     for (let gx = x; gx <= x + w; gx += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(gx, y);
-      ctx.lineTo(gx, y + h);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx, y + h); ctx.stroke();
     }
     for (let gy = y; gy <= y + h; gy += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(x, gy);
-      ctx.lineTo(x + w, gy);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke();
     }
   }
 
@@ -160,25 +155,31 @@ export class Minimap {
   drawExhibitionZones(ctx) {
     const colors = {
       plans: '#0a84ff',
-      cases: '#ff6b6b',
-      training: '#ffd93d',
-      docs: '#6bcb77'
+      cases: '#4ac0ff',
+      training: '#30d158',
+      docs: '#ff9f0a'
     };
 
     this.exhibitionZones.forEach(zone => {
-      const x = this.offsetX + zone.x * this.scale - 8;
-      const y = this.offsetY + zone.z * this.scale - 8;
+      const x = this.offsetX + zone.x * this.scale - 10;
+      const y = this.offsetY + zone.z * this.scale - 10;
 
+      // 区域高亮
       ctx.fillStyle = colors[zone.id] || '#0a84ff';
-      ctx.globalAlpha = 0.6;
-      ctx.fillRect(x, y, 16, 16);
+      ctx.globalAlpha = 0.3;
+      ctx.fillRect(x, y, 20, 20);
       ctx.globalAlpha = 1;
 
+      // 区域边框
+      ctx.strokeStyle = colors[zone.id] || '#0a84ff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(x, y, 20, 20);
+
       // 标签
-      ctx.fillStyle = '#fff';
-      ctx.font = '8px sans-serif';
+      ctx.fillStyle = '#e8edf5';
+      ctx.font = '8px monospace';
       ctx.textAlign = 'center';
-      ctx.fillText(zone.name.replace('区', ''), x + 8, y + 24);
+      ctx.fillText(zone.name.replace('区', ''), x + 10, y + 28);
     });
   }
 
@@ -190,13 +191,15 @@ export class Minimap {
 
     const pos = this.worldToMinimap(this.teleportTarget.x, this.teleportTarget.z);
 
-    ctx.strokeStyle = '#00ff00';
+    ctx.strokeStyle = '#4ac0ff';
     ctx.lineWidth = 2;
+    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 6;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
-    ctx.strokeStyle = 'rgba(0, 255, 0, 0.4)';
+    ctx.strokeStyle = 'rgba(10, 132, 255, 0.3)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
@@ -222,21 +225,25 @@ export class Minimap {
     const endX = x + direction.x * lineLength;
     const endY = y + direction.z * lineLength;
 
-    ctx.strokeStyle = '#ff4444';
+    ctx.strokeStyle = '#4ac0ff';
     ctx.lineWidth = 2;
+    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 4;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(endX, endY);
     ctx.stroke();
+    ctx.shadowBlur = 0;
 
     // 玩家点
-    ctx.fillStyle = '#ff4444';
+    ctx.fillStyle = '#4ac0ff';
+    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 8;
     ctx.beginPath();
     ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fill();
+    ctx.shadowBlur = 0;
 
     // 外圈
-    ctx.strokeStyle = 'rgba(255, 68, 68, 0.4)';
+    ctx.strokeStyle = 'rgba(10, 132, 255, 0.3)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(x, y, 8, 0, Math.PI * 2);

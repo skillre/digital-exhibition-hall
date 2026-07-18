@@ -14,11 +14,11 @@ export class AutoTourMode {
 
     // 路径系统
     this.waypoints = [
-      { position: new THREE.Vector3(0, 1.6, 5), lookAt: new THREE.Vector3(0, 1.6, 0), duration: 3000 },
-      { position: new THREE.Vector3(-7, 1.6, -3), lookAt: new THREE.Vector3(-10, 1.6, -10), duration: 5000 },
-      { position: new THREE.Vector3(7, 1.6, -3), lookAt: new THREE.Vector3(10, 1.6, -10), duration: 5000 },
-      { position: new THREE.Vector3(0, 1.6, -7), lookAt: new THREE.Vector3(0, 1.6, -10), duration: 5000 },
-      { position: new THREE.Vector3(0, 1.6, 7), lookAt: new THREE.Vector3(0, 1.6, 10), duration: 5000 }
+      { position: new THREE.Vector3(0, 1.6, 14), lookAt: new THREE.Vector3(0, 1.6, 0), duration: 3000 },
+      { position: new THREE.Vector3(-8, 1.6, -3), lookAt: new THREE.Vector3(-11, 2, 0), duration: 5000 },
+      { position: new THREE.Vector3(8, 1.6, -3), lookAt: new THREE.Vector3(11, 2, 0), duration: 5000 },
+      { position: new THREE.Vector3(0, 1.6, -8), lookAt: new THREE.Vector3(0, 2, -11), duration: 5000 },
+      { position: new THREE.Vector3(0, 1.6, 8), lookAt: new THREE.Vector3(0, 2, 11), duration: 5000 }
     ];
 
     this.currentIndex = 0;

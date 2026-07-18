@@ -48,10 +48,9 @@ async function initApp() {
     exhibitionHall = new ExhibitionHall(CONFIG.exhibition);
     exhibitionHall.create(sceneManager.scene);
 
-    // 创建中央装置
-    // 中央装置已禁用（太亮）
+    // 创建中央装置（深色主题下增强发光）
     techCenterpiece = new TechCenterpiece();
-    techCenterpiece.create(sceneManager.scene, { x: 0, y: 3, z: 0 });
+    techCenterpiece.create(sceneManager.scene, { x: 0, y: 3.5, z: 0 });
 
     updateLoadingProgress(50, '初始化控制...');
 
@@ -86,10 +85,10 @@ async function initApp() {
     minimap = new Minimap(CONFIG.exhibition, playerControls);
     minimap.init();
     minimap.setExhibitionZones([
-      { id: 'plans', name: '服务方案', x: -10, z: 0 },
-      { id: 'cases', name: '案例成果', x: 10, z: 0 },
-      { id: 'training', name: '培训教育', x: 0, z: -10 },
-      { id: 'docs', name: '技术文档', x: 0, z: 10 }
+      { id: 'plans', name: '服务方案', x: -11, z: 0 },
+      { id: 'cases', name: '案例成果', x: 11, z: 0 },
+      { id: 'training', name: '培训教育', x: 0, z: -11 },
+      { id: 'docs', name: '技术文档', x: 0, z: 11 }
     ]);
 
     // 初始化自动巡展模式

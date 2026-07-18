@@ -1,7 +1,7 @@
 /**
  * 场景管理器
- * 视觉方向（唯一）：明亮科技极简（Apple Store 感）
- * 核心：明亮白系环境贴图 + 统一 PBR 建筑面 + 明亮灯光 + 克制 Bloom
+ * 视觉方向：深色科技沉浸（Cyber Dark）
+ * 核心：深色环境贴图 + 蓝色科技灯光 + 增强 Bloom
  * 明度总闸：灯光强度 + THEME.exposure（ACESFilmic），只在此处控制。
  */
 
@@ -10,7 +10,6 @@ import { THEME } from '../config.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 
 export class SceneManager {
   constructor(sceneConfig, cameraConfig, lightingConfig) {
@@ -72,38 +71,41 @@ export class SceneManager {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    // 明度总闸：唯一曝光来源
     this.renderer.toneMappingExposure = THEME.exposure;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
   }
 
   /**
-   * 创建环境贴图 — 明亮白系
-   * 给 PBR 建筑面提供柔和明亮的反射环境，使空间通透干净。
+   * 创建环境贴图 — 深色科技
+   * 给 PBR 建筑面提供深色调反射环境。
    */
   createEnvironment() {
     try {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0xf4f6f9);
+      envScene.background = new THREE.Color(0x0c1018);
+
       const panelGeo = new THREE.PlaneGeometry(10, 10);
-      const bright = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const mid = new THREE.MeshBasicMaterial({ color: 0xe6ebf1 });
-      const floor = new THREE.MeshBasicMaterial({ color: 0xd6dce4 });
+      const dark = new THREE.MeshBasicMaterial({ color: 0x0c1018 });
+      const mid = new THREE.MeshBasicMaterial({ color: 0x141a28 });
+      const accent = new THREE.MeshBasicMaterial({ color: 0x0a2a50 });
+      const floor = new THREE.MeshBasicMaterial({ color: 0x0a0e17 });
+
       const faces = [
-        { mat: floor, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
-        { mat: bright, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
-        { mat: mid, pos: [0, 0, -5], rot: [0, 0, 0] },
-        { mat: mid, pos: [0, 0, 5], rot: [0, Math.PI, 0] },
-        { mat: mid, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
-        { mat: mid, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
+        { mat: floor,  pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
+        { mat: dark,   pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
+        { mat: mid,    pos: [0, 0, -5], rot: [0, 0, 0] },
+        { mat: mid,    pos: [0, 0, 5], rot: [0, Math.PI, 0] },
+        { mat: accent, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
+        { mat: accent, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
       ];
       faces.forEach(f => {
         const m = new THREE.Mesh(panelGeo, f.mat);
         m.position.set(...f.pos); m.rotation.set(...f.rot);
         envScene.add(m);
       });
+
       const envTexture = pmremGenerator.fromScene(envScene).texture;
       this.scene.environment = envTexture;
       envScene.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
@@ -115,7 +117,7 @@ export class SceneManager {
   }
 
   /**
-   * 创建灯光 — 明亮基调 + 克制蓝色补光
+   * 创建灯光 — 暗调基调 + 蓝色科技补光
    */
   createLighting() {
     const a = this.lightingConfig.ambient;
@@ -139,15 +141,35 @@ export class SceneManager {
     dir.shadow.bias = -0.0005;
     this.scene.add(dir);
 
-    // 蓝色科技补光（克制，只给空间一点蓝调氛围）
+    // 蓝色科技补光（空间氛围）
     const ac = this.lightingConfig.accent;
-    const accent = new THREE.PointLight(ac.color, ac.intensity, 35);
-    accent.position.set(0, 6, 0);
+    const accent = new THREE.PointLight(ac.color, ac.intensity, 40);
+    accent.position.set(0, 7, 0);
     this.scene.add(accent);
+
+    // 四个展区的蓝色聚光灯
+    const zonePositions = [
+      { x: -11, z: 0 },   // 服务方案
+      { x: 11, z: 0 },    // 案例成果
+      { x: 0, z: -11 },   // 培训教育
+      { x: 0, z: 11 },    // 技术文档
+    ];
+    zonePositions.forEach(pos => {
+      const spot = new THREE.SpotLight(0x0a84ff, 1.5, 20, Math.PI / 5, 0.6, 1);
+      spot.position.set(pos.x, 9, pos.z);
+      spot.target.position.set(pos.x, 0, pos.z);
+      this.scene.add(spot);
+      this.scene.add(spot.target);
+    });
+
+    // 入口处暖色引导光
+    const entryLight = new THREE.PointLight(0x4ac0ff, 0.8, 15);
+    entryLight.position.set(0, 6, 18);
+    this.scene.add(entryLight);
   }
 
   /**
-   * 后处理：Bloom + 扫描线
+   * 后处理：增强 Bloom
    */
   createPostProcessing() {
     try {
@@ -155,6 +177,7 @@ export class SceneManager {
       this.renderer.getSize(size);
       this.composer = new EffectComposer(this.renderer);
       this.composer.addPass(new RenderPass(this.scene, this.camera));
+
       const bloomPass = new UnrealBloomPass(
         new THREE.Vector2(size.x, size.y),
         THEME.bloom.strength,

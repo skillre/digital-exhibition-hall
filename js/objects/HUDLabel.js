@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
 const COL = {
-  bg: 'rgba(255, 255, 255, 0.88)',
-  border: 'rgba(10, 132, 255, 0.5)',
-  text: '#1c2530',
+  bg: 'rgba(12, 20, 36, 0.9)',
+  border: 'rgba(10, 132, 255, 0.6)',
+  text: '#e8edf5',
   glow: '#0a84ff',
-  dim: '#6e7a8a',
+  dim: '#7a8ba5',
 };
 const FONT_MONO = 'SF Mono, JetBrains Mono, Menlo, Consolas, monospace';
 
@@ -22,7 +22,7 @@ function roundRect(ctx, x, y, w, h, r) {
 function drawIcon(ctx, type, cx, cy, s) {
   ctx.save();
   ctx.strokeStyle = COL.glow; ctx.fillStyle = COL.glow;
-  ctx.lineWidth = 4; ctx.shadowColor = COL.glow; ctx.shadowBlur = 8;
+  ctx.lineWidth = 4; ctx.shadowColor = COL.glow; ctx.shadowBlur = 12;
   switch (type) {
     case 'shield':
       ctx.beginPath();
@@ -72,22 +72,34 @@ export class HUDLabel {
     const canvas = document.createElement('canvas');
     canvas.width = 512; canvas.height = 128;
     const ctx = canvas.getContext('2d');
-    ctx.fillStyle = COL.bg; roundRect(ctx, 6, 6, canvas.width - 12, canvas.height - 12, 14); ctx.fill();
+
+    // 深色背景
+    ctx.fillStyle = COL.bg; roundRect(ctx, 4, 4, canvas.width - 8, canvas.height - 8, 12); ctx.fill();
+
+    // 蓝色发光边框
     ctx.strokeStyle = COL.border; ctx.lineWidth = 3;
-    ctx.shadowColor = COL.glow; ctx.shadowBlur = 12;
-    roundRect(ctx, 6, 6, canvas.width - 12, canvas.height - 12, 14); ctx.stroke();
+    ctx.shadowColor = COL.glow; ctx.shadowBlur = 16;
+    roundRect(ctx, 4, 4, canvas.width - 8, canvas.height - 8, 12); ctx.stroke();
     ctx.shadowBlur = 0;
+
     if (icon) { drawIcon(ctx, icon, 50, 64, 40); }
+
+    // 浅色文字（暗背景上）
     ctx.fillStyle = color; ctx.font = 'bold 42px ' + FONT_MONO;
     ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = COL.glow; ctx.shadowBlur = 4;
     ctx.fillText(text, icon ? 96 : 40, sub ? 50 : 64);
+    ctx.shadowBlur = 0;
+
     if (sub) { ctx.fillStyle = COL.dim; ctx.font = '22px ' + FONT_MONO; ctx.fillText(sub, icon ? 96 : 40, 92); }
+
     const tex = new THREE.CanvasTexture(canvas);
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
     const sprite = new THREE.Sprite(mat);
     sprite.scale.set(size * 4, size, 1);
     return sprite;
   }
+
   static createIcon(type) {
     const canvas = document.createElement('canvas');
     canvas.width = 128; canvas.height = 128;
