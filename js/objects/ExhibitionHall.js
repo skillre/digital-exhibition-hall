@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 /**
  * 展厅模型
  * 负责创建 3D 展厅空间
@@ -28,9 +30,13 @@ export class ExhibitionHall {
       panelHover: null
     };
 
+    // 粒子系统
+    this.particles = null;
+
     // 资源追踪（Phase 3: 修复资源泄漏）
     this._textures = [];
     this._geometries = [];
+    this._trackedMaterials = [];  // 追踪局部创建的材质
   }
 
   /**
@@ -45,6 +51,7 @@ export class ExhibitionHall {
     this.createWalls();
     this.createCeiling();
     this.createDecorations();
+    this.createEntranceParticles();
 
     console.log('展厅创建完成');
   }
@@ -430,7 +437,8 @@ export class ExhibitionHall {
       document: '📄',
       image: '🖼️',
       video: '🎬',
-      chart: '📊'
+      chart: '📊',
+      model3d: '🧊'
     };
     return icons[type] || '📋';
   }
@@ -474,6 +482,75 @@ export class ExhibitionHall {
   }
 
   /**
+   * 创建入口粒子效果
+   */
+  createEntranceParticles() {
+    const particleCount = 200;
+    const spread = 5;
+    const depth = this.config.depth;
+
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3;
+      positions[i3] = (Math.random() - 0.5) * spread;
+      positions[i3 + 1] = 1 + Math.random() * 2;
+      positions[i3 + 2] = (depth / 2) + (Math.random() - 0.5) * spread;
+
+      velocities[i3] = (Math.random() - 0.5) * 0.01;
+      velocities[i3 + 1] = Math.random() * 0.02 + 0.01;
+      velocities[i3 + 2] = (Math.random() - 0.5) * 0.01;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    this._geometries.push(geometry);
+
+    const material = new THREE.PointsMaterial({
+      color: 0x00d2ff,
+      size: 0.05,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    this._trackedMaterials.push(material);
+
+    this.particles = new THREE.Points(geometry, material);
+    this.particles.userData.velocities = velocities;
+    this.scene.add(this.particles);
+
+    console.log('入口粒子效果创建完成');
+  }
+
+  /**
+   * 更新粒子动画
+   */
+  updateParticles() {
+    if (!this.particles) return;
+
+    const positions = this.particles.geometry.attributes.position.array;
+    const velocities = this.particles.userData.velocities;
+    const count = positions.length / 3;
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      positions[i3] += velocities[i3];
+      positions[i3 + 1] += velocities[i3 + 1];
+      positions[i3 + 2] += velocities[i3 + 2];
+
+      if (positions[i3 + 1] > 4) {
+        positions[i3 + 1] = 1;
+        positions[i3] = (Math.random() - 0.5) * 5;
+        positions[i3 + 2] = (this.config.depth / 2) + (Math.random() - 0.5) * 5;
+      }
+    }
+
+    this.particles.geometry.attributes.position.needsUpdate = true;
+  }
+
+  /**
    * 清理资源（Phase 3: 完整资源清理）
    */
   dispose() {
@@ -489,10 +566,22 @@ export class ExhibitionHall {
     });
     this._geometries = [];
 
+    // 清理追踪的材质
+    this._trackedMaterials.forEach(material => {
+      if (material) material.dispose();
+    });
+    this._trackedMaterials = [];
+
     // 清理材质
     Object.values(this.materials).forEach(material => {
       if (material) material.dispose();
     });
+
+    // 清理粒子系统
+    if (this.particles) {
+      this.scene.remove(this.particles);
+      this.particles = null;
+    }
 
     console.log('展厅资源已清理');
   }

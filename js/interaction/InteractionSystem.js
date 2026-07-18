@@ -1,3 +1,6 @@
+import * as THREE from 'three';
+import { InteractionStateMachine, InteractionState } from './InteractionStateMachine.js';
+
 /**
  * 交互系统
  * 负责处理用户与展板的交互
@@ -18,6 +21,9 @@ export class InteractionSystem {
     // 射线检测
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
+
+    // 交互状态机
+    this.stateMachine = new InteractionStateMachine();
 
     // 交互状态
     this.enabled = false;
@@ -81,9 +87,8 @@ export class InteractionSystem {
       return;
     }
 
-    // 检查是否有模态框打开
-    const modal = document.getElementById('modal');
-    if (modal && !modal.classList.contains('hidden')) {
+    // 模态框或模型交互状态下不处理悬停
+    if (this.stateMachine.is(InteractionState.MODAL) || this.stateMachine.is(InteractionState.MODEL_INTERACT)) {
       return;
     }
 
@@ -109,6 +114,11 @@ export class InteractionSystem {
         this.hoveredObject = object;
         this.exhibitionHall.highlightPanel(object);
 
+        // 转换到悬停状态
+        if (this.stateMachine.is(InteractionState.NAVIGATE)) {
+          this.stateMachine.transition(InteractionState.HOVER);
+        }
+
         this.showTooltip(event, object.userData.title);
         document.body.style.cursor = 'pointer';
       }
@@ -121,6 +131,11 @@ export class InteractionSystem {
         this.hoveredObject = null;
         this.hideTooltip();
         document.body.style.cursor = 'default';
+
+        // 恢复到导航状态
+        if (this.stateMachine.is(InteractionState.HOVER)) {
+          this.stateMachine.transition(InteractionState.NAVIGATE);
+        }
       }
     }
   }
@@ -241,6 +256,12 @@ export class InteractionSystem {
    */
   selectObject(object) {
     if (!object || !object.userData) return;
+
+    // 转换到模态框状态
+    if (this.stateMachine.is(InteractionState.HOVER) || this.stateMachine.is(InteractionState.NAVIGATE)) {
+      this.stateMachine.transition(InteractionState.MODAL);
+    }
+
     this.selectedObject = object;
     this.showPanelDetail(object.userData);
     console.log('选中展板:', object.userData.title);
@@ -251,6 +272,12 @@ export class InteractionSystem {
    */
   deselectObject() {
     if (!this.selectedObject) return;
+
+    // 恢复到导航状态
+    if (this.stateMachine.is(InteractionState.MODAL)) {
+      this.stateMachine.transition(InteractionState.NAVIGATE);
+    }
+
     this.exhibitionHall.unhighlightPanel(this.selectedObject);
     this.selectedObject = null;
     this.hidePanelDetail();

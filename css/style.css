@@ -436,6 +436,77 @@ html, body {
   border-color: #00d2ff;
 }
 
+/* 全屏沉浸模式 */
+.modal.immersive .modal-content {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+  border: none;
+  animation: immersiveExpand 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal.immersive .modal-overlay {
+  backdrop-filter: blur(20px);
+  background: rgba(0, 0, 0, 0.95);
+}
+
+.modal.immersive .modal-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal.immersive .preview {
+  flex: 1;
+  min-height: 0;
+}
+
+.modal.immersive .preview iframe,
+.modal.immersive .preview img,
+.modal.immersive .preview video {
+  max-height: none;
+  height: 100%;
+}
+
+@keyframes immersiveExpand {
+  from {
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    border-radius: 12px;
+    opacity: 0.8;
+  }
+  to {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    opacity: 1;
+  }
+}
+
+/* 3D 模型预览 */
+#model3d-preview {
+  text-align: center;
+}
+
+#model3d-preview canvas {
+  border-radius: 8px;
+  cursor: grab;
+}
+
+#model3d-preview canvas:active {
+  cursor: grabbing;
+}
+
+.model3d-controls {
+  margin-top: 10px;
+  color: #888;
+  font-size: 12px;
+}
+
 /* 提示框 */
 .tooltip {
   position: absolute;

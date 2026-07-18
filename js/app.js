@@ -10,6 +10,7 @@ import { PlayerControls } from './controls/PlayerControls.js';
 import { InteractionSystem } from './interaction/InteractionSystem.js';
 import { UIManager } from './ui/UIManager.js';
 import { Minimap } from './ui/Minimap.js';
+import { AutoTourMode } from './controls/AutoTourMode.js';
 
 // 模块实例
 let sceneManager = null;
@@ -18,6 +19,7 @@ let playerControls = null;
 let interactionSystem = null;
 let uiManager = null;
 let minimap = null;
+let autoTourMode = null;
 
 // FPS 统计
 let frameCount = 0;
@@ -81,6 +83,9 @@ async function initApp() {
       { id: 'training', name: '培训教育', x: 0, z: -10 },
       { id: 'docs', name: '技术文档', x: 0, z: 10 }
     ]);
+
+    // 初始化自动巡展模式
+    autoTourMode = new AutoTourMode(sceneManager.camera, CONFIG.exhibition);
 
     updateLoadingProgress(95, '加载内容...');
 
@@ -175,8 +180,15 @@ function startRenderLoop() {
 
     requestAnimationFrame(animate);
 
-    if (playerControls) {
+    if (autoTourMode && autoTourMode.isActive()) {
+      autoTourMode.update();
+    } else if (playerControls) {
       playerControls.update();
+    }
+
+    // 更新粒子动画
+    if (exhibitionHall) {
+      exhibitionHall.updateParticles();
     }
 
     // 更新小地图
@@ -235,5 +247,6 @@ window.App = {
   playerControls: () => playerControls,
   interactionSystem: () => interactionSystem,
   uiManager: () => uiManager,
-  minimap: () => minimap
+  minimap: () => minimap,
+  autoTourMode: () => autoTourMode
 };

@@ -21,12 +21,12 @@
         },
         {
           "id": "panel-002",
-          "type": "document",
-          "title": "数据安全治理方案",
-          "description": "全面的数据安全治理框架和实施路径，涵盖组织架构、制度流程、技术工具和人员能力四个维度。",
-          "tags": ["安全治理", "体系建设", "合规"],
-          "thumbnail": "assets/images/security-governance.jpg",
-          "contentUrl": "content/documents/security-governance.pdf"
+          "type": "model3d",
+          "title": "安全架构拓扑",
+          "description": "可交互的 3D 安全架构拓扑图，拖拽旋转查看各层级关系。",
+          "tags": ["架构", "3D模型"],
+          "thumbnail": "assets/images/architecture-thumb.jpg",
+          "contentUrl": "content/models/security-topology.json"
         },
         {
           "id": "panel-003",

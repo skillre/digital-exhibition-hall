@@ -1,7 +1,14 @@
 /**
  * 场景管理器
  * 负责创建和管理 Three.js 场景、相机、渲染器
+ * Phase 1: ES Module 迁移 + EffectComposer 后处理管线
  */
+
+import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass';
 
 export class SceneManager {
   /**
@@ -18,6 +25,7 @@ export class SceneManager {
     this.scene = null;
     this.camera = null;
     this.renderer = null;
+    this.composer = null;
     this.objects = [];
 
     this.clock = new THREE.Clock();
@@ -31,6 +39,7 @@ export class SceneManager {
     this.createCamera();
     this.createRenderer();
     this.createLighting();
+    this.createPostProcessing();
 
     console.log('场景管理器初始化完成');
   }
@@ -127,6 +136,38 @@ export class SceneManager {
   }
 
   /**
+   * 创建后处理管线
+   */
+  createPostProcessing() {
+    const size = new THREE.Vector2();
+    this.renderer.getSize(size);
+
+    this.composer = new EffectComposer(this.renderer);
+
+    // 渲染通道
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
+
+    // Bloom 辉光通道
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(size.x, size.y),
+      0.8,  // strength
+      0.3,  // radius
+      0.2   // threshold
+    );
+    this.composer.addPass(bloomPass);
+
+    // SSAO 环境光遮蔽通道
+    const ssaoPass = new SSAOPass(this.scene, this.camera, size.x, size.y);
+    ssaoPass.kernelRadius = 16;
+    ssaoPass.minDistance = 0.005;
+    ssaoPass.maxDistance = 0.1;
+    this.composer.addPass(ssaoPass);
+
+    console.log('后处理管线初始化完成');
+  }
+
+  /**
    * 添加对象到场景
    */
   addObject(object) {
@@ -146,10 +187,12 @@ export class SceneManager {
   }
 
   /**
-   * 渲染场景
+   * 渲染场景（使用后处理管线）
    */
   render() {
-    if (this.renderer && this.scene && this.camera) {
+    if (this.composer) {
+      this.composer.render();
+    } else if (this.renderer && this.scene && this.camera) {
       this.renderer.render(this.scene, this.camera);
     }
   }
@@ -162,6 +205,10 @@ export class SceneManager {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+      if (this.composer) {
+        this.composer.setSize(window.innerWidth, window.innerHeight);
+      }
     }
   }
 
@@ -174,6 +221,14 @@ export class SceneManager {
    * 清理资源
    */
   dispose() {
+    // 清理后处理管线
+    if (this.composer) {
+      this.composer.passes.forEach(pass => {
+        if (pass.dispose) pass.dispose();
+      });
+      this.composer.dispose();
+    }
+
     this.objects.forEach(obj => {
       this.scene.remove(obj);
       if (obj.geometry) obj.geometry.dispose();

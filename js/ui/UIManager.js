@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 /**
  * UI 管理器
  * 负责管理界面交互和状态
@@ -184,10 +186,16 @@ export class UIManager {
    */
   hideModal() {
     this.elements.modal.classList.add('hidden');
+    this.elements.modal.classList.remove('immersive');
     this.currentContent = null;
 
     if (this.elements.videoPlayer) {
       this.elements.videoPlayer.pause();
+    }
+
+    // 恢复 3D 场景渲染质量
+    if (this._originalPixelRatio && window.App && window.App.sceneManager()) {
+      window.App.sceneManager().renderer.setPixelRatio(this._originalPixelRatio);
     }
 
     // 恢复玩家控制
@@ -228,6 +236,9 @@ export class UIManager {
       case 'chart':
         this.showChartPreview(url);
         break;
+      case 'model3d':
+        this.showModel3dPreview(url);
+        break;
       default:
         console.warn('未知的内容类型:', type);
     }
@@ -248,6 +259,42 @@ export class UIManager {
     source.src = url;
     this.elements.videoPlayer.load();
     this.elements.videoPreview.classList.remove('hidden');
+  }
+
+  /**
+   * 显示 3D 模型预览
+   */
+  showModel3dPreview(url) {
+    let modelPreview = document.getElementById('model3d-preview');
+    if (!modelPreview) {
+      modelPreview = document.createElement('div');
+      modelPreview.id = 'model3d-preview';
+      modelPreview.className = 'preview';
+      modelPreview.innerHTML = `
+        <canvas id="model3d-canvas" style="width:100%;height:400px;background:#111;border-radius:8px;"></canvas>
+        <div class="model3d-controls">
+          <span>拖拽旋转 | 滚轮缩放 | 双击重置</span>
+        </div>
+      `;
+      this.elements.previewArea.appendChild(modelPreview);
+    }
+    modelPreview.classList.remove('hidden');
+
+    // 自动进入全屏模式
+    this.showImmersiveModal();
+  }
+
+  /**
+   * 显示全屏沉浸模式
+   */
+  showImmersiveModal() {
+    this.elements.modal.classList.add('immersive');
+
+    // 降低 3D 场景渲染质量以节省性能
+    if (window.App && window.App.sceneManager()) {
+      this._originalPixelRatio = window.App.sceneManager().renderer.getPixelRatio();
+      window.App.sceneManager().renderer.setPixelRatio(0.5);
+    }
   }
 
   /**

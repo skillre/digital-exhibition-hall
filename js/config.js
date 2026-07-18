@@ -50,6 +50,13 @@ export const CONFIG = {
     height: 8,
     depth: 40,
     wallThickness: 0.3
+  },
+
+  // 自动巡展配置
+  autoTour: {
+    moveSpeed: 0.1,
+    pauseDuration: 5000,
+    loopMode: 'loop' // 'loop', 'pingpong', 'once'
   }
 };
 
@@ -60,5 +67,6 @@ export const AppState = {
   currentExhibition: null,
   selectedPanel: null,
   isModalOpen: false,
-  isTeleportMenuOpen: false
+  isTeleportMenuOpen: false,
+  isAutoTourActive: false
 };

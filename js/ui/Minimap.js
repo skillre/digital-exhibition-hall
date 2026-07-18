@@ -1,6 +1,9 @@
+import * as THREE from 'three';
+
 /**
  * 小地图
  * 使用 2D canvas 绘制展厅俯视图和玩家位置
+ * Phase 6: 支持点击传送
  */
 
 export class Minimap {
@@ -23,6 +26,9 @@ export class Minimap {
 
     // 展区位置
     this.exhibitionZones = [];
+
+    // 传送目标
+    this.teleportTarget = null;
   }
 
   /**
@@ -34,7 +40,46 @@ export class Minimap {
       return;
     }
 
+    // 添加点击传送事件
+    this.canvas.addEventListener('click', (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const minimapX = e.clientX - rect.left;
+      const minimapY = e.clientY - rect.top;
+
+      const worldPos = this.minimapToWorld(minimapX, minimapY);
+
+      // 边界检查
+      const halfW = this.config.width / 2;
+      const halfD = this.config.depth / 2;
+      if (Math.abs(worldPos.x) <= halfW && Math.abs(worldPos.z) <= halfD) {
+        this.teleportTarget = worldPos;
+        if (this.playerControls) {
+          this.playerControls.teleportTo({ x: worldPos.x, y: 0, z: worldPos.z });
+        }
+      }
+    });
+
     console.log('小地图初始化完成');
+  }
+
+  /**
+   * 小地图坐标 → 世界坐标
+   */
+  minimapToWorld(minimapX, minimapY) {
+    return {
+      x: (minimapX - this.offsetX) / this.scale,
+      z: (minimapY - this.offsetY) / this.scale
+    };
+  }
+
+  /**
+   * 世界坐标 → 小地图坐标
+   */
+  worldToMinimap(worldX, worldZ) {
+    return {
+      x: this.offsetX + worldX * this.scale,
+      y: this.offsetY + worldZ * this.scale
+    };
   }
 
   /**
@@ -67,6 +112,9 @@ export class Minimap {
 
     // 绘制展区
     this.drawExhibitionZones(ctx);
+
+    // 绘制传送目标标记
+    this.drawTeleportTarget(ctx);
 
     // 绘制玩家位置
     this.drawPlayer(ctx);
@@ -132,6 +180,27 @@ export class Minimap {
       ctx.textAlign = 'center';
       ctx.fillText(zone.name.replace('区', ''), x + 8, y + 24);
     });
+  }
+
+  /**
+   * 绘制传送目标标记
+   */
+  drawTeleportTarget(ctx) {
+    if (!this.teleportTarget) return;
+
+    const pos = this.worldToMinimap(this.teleportTarget.x, this.teleportTarget.z);
+
+    ctx.strokeStyle = '#00ff00';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 8, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = 'rgba(0, 255, 0, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
+    ctx.stroke();
   }
 
   /**

@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 /**
  * 玩家控制器
  * 负责第一人称视角的移动和视角控制
@@ -36,6 +38,12 @@ export class PlayerControls {
     this.raycaster = new THREE.Raycaster();
     this.raycaster.far = config.collisionDistance;
     this._walls = [];
+
+    // 传送动画状态
+    this.teleportTarget = null;
+    this.teleportProgress = 0;
+    this.teleportDuration = 0.5; // 秒
+    this.teleportStartPosition = new THREE.Vector3();
 
     // 是否启用控制
     this.enabled = false;
@@ -200,13 +208,31 @@ export class PlayerControls {
   }
 
   /**
-   * 更新控制器
+   * 更新控制器（支持沿墙滑动）
    */
   update() {
     if (!this.enabled) return;
 
     // Phase 3: 使用实际帧时间差
     const delta = this.clock ? this.clock.getDelta() : 0.016;
+
+    // 传送动画
+    if (this.teleportTarget) {
+      this.teleportProgress += delta / this.teleportDuration;
+      if (this.teleportProgress >= 1) {
+        this.camera.position.copy(this.teleportTarget);
+        this.teleportTarget = null;
+        this.teleportProgress = 0;
+      } else {
+        this.camera.position.lerpVectors(
+          this.teleportStartPosition,
+          this.teleportTarget,
+          this.teleportProgress
+        );
+      }
+      this.camera.position.y = this.config.height;
+      return;
+    }
 
     // 计算移动方向
     this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
@@ -227,9 +253,14 @@ export class PlayerControls {
       this.velocity.x = 0;
     }
 
-    // 检查碰撞
-    if (!this.checkCollision()) {
+    // 分离 X/Z 轴碰撞检测 - 实现沿墙滑动
+    const canMoveX = !this.checkAxisCollision('x');
+    const canMoveZ = !this.checkAxisCollision('z');
+
+    if (canMoveX) {
       this.camera.translateX(this.velocity.x * delta);
+    }
+    if (canMoveZ) {
       this.camera.translateZ(this.velocity.z * delta);
     }
 
@@ -240,62 +271,46 @@ export class PlayerControls {
   }
 
   /**
-   * 碰撞检测
-   * @returns {boolean} 是否发生碰撞
+   * 按轴分离的碰撞检测 - 实现沿墙滑动
+   * @param {string} axis - 'x' 或 'z'
+   * @returns {boolean} 该轴是否发生碰撞
    */
-  checkCollision() {
+  checkAxisCollision(axis) {
     const collidables = this._walls;
     if (collidables.length === 0) return false;
 
-    const cameraDirection = new THREE.Vector3();
-    this.camera.getWorldDirection(cameraDirection);
+    let direction;
+    if (axis === 'x') {
+      if (this.moveLeft) {
+        direction = new THREE.Vector3(-1, 0, 0).applyQuaternion(this.camera.quaternion);
+      } else if (this.moveRight) {
+        direction = new THREE.Vector3(1, 0, 0).applyQuaternion(this.camera.quaternion);
+      } else {
+        return false;
+      }
+    } else if (axis === 'z') {
+      if (this.moveForward) {
+        direction = this.camera.getWorldDirection(new THREE.Vector3());
+      } else if (this.moveBackward) {
+        direction = new THREE.Vector3(0, 0, 1).applyQuaternion(this.camera.quaternion);
+      } else {
+        return false;
+      }
+    }
 
-    // 前方碰撞
-    this.raycaster.set(this.camera.position, cameraDirection);
+    this.raycaster.set(this.camera.position, direction);
     const intersections = this.raycaster.intersectObjects(collidables);
-    if (intersections.length > 0 && intersections[0].distance < this.config.collisionDistance) {
-      return true;
-    }
-
-    // 左方碰撞
-    if (this.moveLeft) {
-      const leftDirection = new THREE.Vector3(-1, 0, 0).applyQuaternion(this.camera.quaternion);
-      this.raycaster.set(this.camera.position, leftDirection);
-      const leftIntersections = this.raycaster.intersectObjects(collidables);
-      if (leftIntersections.length > 0 && leftIntersections[0].distance < this.config.collisionDistance) {
-        return true;
-      }
-    }
-
-    // 右方碰撞
-    if (this.moveRight) {
-      const rightDirection = new THREE.Vector3(1, 0, 0).applyQuaternion(this.camera.quaternion);
-      this.raycaster.set(this.camera.position, rightDirection);
-      const rightIntersections = this.raycaster.intersectObjects(collidables);
-      if (rightIntersections.length > 0 && rightIntersections[0].distance < this.config.collisionDistance) {
-        return true;
-      }
-    }
-
-    // 后方碰撞
-    if (this.moveForward === false && this.moveBackward) {
-      const backDirection = new THREE.Vector3(0, 0, 1).applyQuaternion(this.camera.quaternion);
-      this.raycaster.set(this.camera.position, backDirection);
-      const backIntersections = this.raycaster.intersectObjects(collidables);
-      if (backIntersections.length > 0 && backIntersections[0].distance < this.config.collisionDistance) {
-        return true;
-      }
-    }
-
-    return false;
+    return intersections.length > 0 && intersections[0].distance < this.config.collisionDistance;
   }
 
   /**
-   * 传送到指定位置
-   * @param {THREE.Vector3} position - 目标位置
+   * 平滑传送到指定位置
+   * @param {Object} position - 目标位置 {x, y, z}
    */
   teleportTo(position) {
-    this.camera.position.set(position.x, this.config.height, position.z);
+    this.teleportStartPosition.copy(this.camera.position);
+    this.teleportTarget = new THREE.Vector3(position.x, this.config.height, position.z);
+    this.teleportProgress = 0;
     this.velocity.set(0, 0, 0);
     console.log(`传送到: ${position.x}, ${position.y}, ${position.z}`);
   }
