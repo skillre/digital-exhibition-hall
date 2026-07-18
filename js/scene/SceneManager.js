@@ -157,11 +157,12 @@ export class SceneManager {
     );
     this.composer.addPass(bloomPass);
 
-    // SSAO 环境光遮蔽通道
+    // SSAO 环境光遮蔽通道（低强度，避免压暗场景）
     const ssaoPass = new SSAOPass(this.scene, this.camera, size.x, size.y);
-    ssaoPass.kernelRadius = 8;
+    ssaoPass.kernelRadius = 4;
     ssaoPass.minDistance = 0.005;
     ssaoPass.maxDistance = 0.1;
+    ssaoPass.output = SSAOPass.OUTPUT.Default;
     this.composer.addPass(ssaoPass);
 
     console.log('后处理管线初始化完成');

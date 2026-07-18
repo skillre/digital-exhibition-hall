@@ -61,25 +61,25 @@ export class ExhibitionHall {
    */
   initMaterials() {
     this.materials.floor = new THREE.MeshStandardMaterial({
-      color: 0x556677,
+      color: 0x778899,
       roughness: 0.6,
       metalness: 0.2
     });
 
     this.materials.wall = new THREE.MeshStandardMaterial({
-      color: 0x667788,
+      color: 0x8899aa,
       roughness: 0.7,
       metalness: 0.1
     });
 
     this.materials.ceiling = new THREE.MeshStandardMaterial({
-      color: 0x445566,
+      color: 0x667788,
       roughness: 0.8,
       metalness: 0.1
     });
 
     this.materials.panel = new THREE.MeshStandardMaterial({
-      color: 0x1a1a2e,
+      color: 0x3a4a5a,
       roughness: 0.5,
       metalness: 0.3
     });
