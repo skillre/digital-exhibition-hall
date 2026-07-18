@@ -83,11 +83,11 @@ export class SceneManager {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x3a4a60);
+      envScene.background = new THREE.Color(0x2a3850);
       const panelGeo = new THREE.PlaneGeometry(10, 10);
-      const bright = new THREE.MeshBasicMaterial({ color: 0xd8e8f8 });
-      const mid = new THREE.MeshBasicMaterial({ color: 0x3a4a60 });
-      const floor = new THREE.MeshBasicMaterial({ color: 0x0e1e38 });
+      const bright = new THREE.MeshBasicMaterial({ color: 0xb0c0d0 });
+      const mid = new THREE.MeshBasicMaterial({ color: 0x2a3850 });
+      const floor = new THREE.MeshBasicMaterial({ color: 0x0c1a34 });
       const faces = [
         { mat: floor, pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
         { mat: bright, pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
@@ -142,10 +142,10 @@ export class SceneManager {
     this.scene.add(accent);
 
     // 冷白补光
-    const warmFill = new THREE.PointLight(0xddeeff, 0.8, 25);
+    const warmFill = new THREE.PointLight(0xaabbcc, 0.4, 25);
     warmFill.position.set(-8, 6, 5);
     this.scene.add(warmFill);
-    const warmFill2 = new THREE.PointLight(0xddeeff, 0.6, 20);
+    const warmFill2 = new THREE.PointLight(0xaabbcc, 0.3, 20);
     warmFill2.position.set(8, 6, -5);
     this.scene.add(warmFill2);
   }

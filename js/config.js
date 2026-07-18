@@ -6,22 +6,22 @@
 // 视觉设计令牌
 export const THEME = {
   // 基调
-  bgDeep: 0x080e1a,
-  surfaceDark: 0xffffff,   // 纯白墙面
-  surfaceMid: 0xffffff,    // 纯白天花板
+  bgDeep: 0x0a1420,
+  surfaceDark: 0xd0dce8,   // 柔和蓝白墙面
+  surfaceMid: 0xdce6f0,    // 柔和蓝白天花板
   neon: 0x00d2ff,
   ice: 0x0088ff,
   safe: 0x00ff88,
   threat: 0xff00aa,
-  floor: { color: 0x0a1a38, roughness: 0.15, metalness: 0.15, envMapIntensity: 1.0 },
-  wall: { color: 0xffffff, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.15 },
+  floor: { color: 0x0c1a34, roughness: 0.2, metalness: 0.15, envMapIntensity: 0.6 },
+  wall: { color: 0xd0dce8, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.2 },
   panel: { color: 0x0a1628, emissive: 0x00d2ff, emissiveIntensity: 0.6 },
-  // 灯光 — 高强度照明
-  ambient: { color: 0xf0f4f8, intensity: 1.5 },
-  directional: { color: 0xffffff, intensity: 2.0 },
-  hemisphere: { sky: 0xf0f6ff, ground: 0x0a1a38, intensity: 0.8 },
-  accent: { color: 0x00d2ff, intensity: 2.5 },
-  fog: { color: 0x080e1a, density: 0.002 },
+  // 灯光 — 柔和冷白
+  ambient: { color: 0xdce4ee, intensity: 0.8 },
+  directional: { color: 0xffffff, intensity: 1.2 },
+  hemisphere: { sky: 0xe0eaf4, ground: 0x0c1a34, intensity: 0.5 },
+  accent: { color: 0x00d2ff, intensity: 2.0 },
+  fog: { color: 0x0a1420, density: 0.002 },
   bloom: { strength: 0.4, radius: 0.3, threshold: 0.7 },
 };
 
