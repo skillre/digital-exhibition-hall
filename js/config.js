@@ -10,49 +10,51 @@
 
 // ── 设计令牌 ─────────────────────────────────────────────
 export const THEME = {
-  // 空间基调（深色科技）
-  bg:        0x080c14,   // 背景 / 远景（极深蓝黑）
-  wall:      0x141a28,   // 墙面（深蓝灰）
-  ceiling:   0x0c1018,   // 天花板（深黑蓝）
-  floor:     0x101620,   // 地面（深灰蓝）
-  floorGrid: 0x1a2540,   // 地面网格线
+  // 空间基调（明亮科技深色）
+  bg:        0x101825,   // 背景 / 远景（中性深蓝灰）
+  wall:      0x1e2d42,   // 墙面（明亮蓝灰）
+  ceiling:   0x182535,   // 天花板（中性深蓝）
+  floor:     0x1a2838,   // 地面（中性灰蓝）
+  floorGrid: 0x2a3f5a,   // 地面网格线（更亮）
 
-  // 蓝色科技点缀（唯一强调色系）
+  // 双色科技强调（蓝 + 青）
   accent:    0x0a84ff,   // 主蓝
   accentDim: 0x4aa3ff,   // 辅助浅蓝
   accentGlow: 0x0066cc,  // 深蓝辉光
   led:       0x4ac0ff,   // LED 灯带（冷蓝白）
+  cyan:      0x00d4aa,   // 科技青绿（第二强调色）
+  cyanDim:   0x00b89a,   // 辅助青绿
 
   // 状态色（数据安全语义，克制使用）
   safe:      0x30d158,
   threat:    0xff453a,
 
   // 文字（用于 3D Canvas 纹理 / HUD）
-  ink:       0xe8edf5,   // 浅白字（暗背景上）
-  inkDim:    0x7a8ba5,
+  ink:       0xf0f4fa,   // 浅白字（更亮）
+  inkDim:    0x8a9cb5,   // 灰字（更亮）
 
-  // ── 明度控制（暗调基调，蓝色发光点缀）──
+  // ── 明度控制（明亮科技基调 + 双色发光）──
   lighting: {
-    ambient:     { color: 0x1a2540, intensity: 0.3 },
-    hemisphere:  { sky: 0x1a2540, ground: 0x080c14, intensity: 0.4 },
-    directional: { color: 0xc8d8f0, intensity: 0.6, position: { x: 6, y: 12, z: 6 } },
+    ambient:     { color: 0x2a3a55, intensity: 0.5 },
+    hemisphere:  { sky: 0x2a3a55, ground: 0x101825, intensity: 0.6 },
+    directional: { color: 0xd8e4f4, intensity: 0.9, position: { x: 6, y: 12, z: 6 } },
     // 蓝色科技补光（核心氛围光）
-    accent:      { color: 0x0a84ff, intensity: 1.2 },
+    accent:      { color: 0x0a84ff, intensity: 1.8 },
   },
-  exposure: 0.9,        // ACESFilmic 曝光
+  exposure: 1.1,        // ACESFilmic 曝光（提升整体亮度）
 
-  // 材质参数（受光建筑面统一 PBR）
+  // 材质参数（受光建筑面统一 PBR，增加反射）
   material: {
-    floor:   { roughness: 0.35, metalness: 0.25, envMapIntensity: 0.4 },
-    wall:    { roughness: 0.75, metalness: 0.05, envMapIntensity: 0.3 },
-    ceiling: { roughness: 0.85, metalness: 0.0,  envMapIntensity: 0.2 },
+    floor:   { roughness: 0.25, metalness: 0.35, envMapIntensity: 0.6 },
+    wall:    { roughness: 0.55, metalness: 0.12, envMapIntensity: 0.5 },
+    ceiling: { roughness: 0.7,  metalness: 0.05, envMapIntensity: 0.3 },
   },
 
-  // 雾（融入背景色，深色远处淡出）
-  fog: { color: 0x080c14, density: 0.018 },
+  // 雾（融入背景色，减弱以增加可见度）
+  fog: { color: 0x101825, density: 0.012 },
 
-  // Bloom（增强发光感）
-  bloom: { strength: 0.6, radius: 0.6, threshold: 0.7 },
+  // Bloom（增强发光感，降低阈值让更多元素参与）
+  bloom: { strength: 0.8, radius: 0.5, threshold: 0.5 },
 };
 
 // ── 全局配置 ─────────────────────────────────────────────

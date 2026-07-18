@@ -138,10 +138,10 @@ export class TechCenterpiece {
    * 垂直光束（从底部到顶部）
    */
   createVerticalBeam() {
-    const beamGeo = new THREE.CylinderGeometry(0.02, 0.02, 5, 8);
+    const beamGeo = new THREE.CylinderGeometry(0.025, 0.025, 5, 8);
     this._geometries.push(beamGeo);
     const beamMat = new THREE.MeshBasicMaterial({
-      color: THEME.accent, transparent: true, opacity: 0.15,
+      color: THEME.accent, transparent: true, opacity: 0.2,
       blending: THREE.AdditiveBlending, depthWrite: false
     });
     this._materials.push(beamMat);

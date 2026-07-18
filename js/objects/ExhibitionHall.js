@@ -60,18 +60,18 @@ export class ExhibitionHall {
   initMaterials() {
     const M = THEME.material;
 
-    // ── 建筑面：统一走「受光」PBR ──
+    // ── 建筑面：统一走「受光」PBR（明亮科技）──
     // 地面带网格纹理
     const floorTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
-      ctx.fillStyle = '#101620'; ctx.fillRect(0, 0, w, h);
-      // 微弱网格线
-      ctx.strokeStyle = 'rgba(26, 37, 64, 0.8)'; ctx.lineWidth = 1;
+      ctx.fillStyle = '#1a2838'; ctx.fillRect(0, 0, w, h);
+      // 亮色网格线
+      ctx.strokeStyle = 'rgba(42, 63, 90, 0.9)'; ctx.lineWidth = 1;
       for (let i = 0; i <= w; i += 32) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke(); }
       for (let j = 0; j <= h; j += 32) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(w, j); ctx.stroke(); }
-      // 噪点
+      // 噪点（更亮）
       for (let k = 0; k < 2000; k++) {
         const x = Math.random() * w, y = Math.random() * h;
-        ctx.fillStyle = `rgba(20, 30, 50, ${Math.random() * 0.3})`;
+        ctx.fillStyle = `rgba(30, 45, 66, ${Math.random() * 0.3})`;
         ctx.fillRect(x, y, 1, 1);
       }
     });
@@ -83,14 +83,14 @@ export class ExhibitionHall {
 
     // 墙面带微弱纹理
     const wallTex = this.createProceduralTexture(256, 256, (ctx, w, h) => {
-      ctx.fillStyle = '#141a28'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#1e2d42'; ctx.fillRect(0, 0, w, h);
       // 水平细线纹理
-      ctx.strokeStyle = 'rgba(20, 30, 50, 0.4)'; ctx.lineWidth = 0.5;
+      ctx.strokeStyle = 'rgba(30, 45, 66, 0.4)'; ctx.lineWidth = 0.5;
       for (let i = 0; i <= h; i += 8) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke(); }
       // 噪点
       for (let k = 0; k < 1000; k++) {
         const x = Math.random() * w, y = Math.random() * h;
-        ctx.fillStyle = `rgba(15, 22, 38, ${Math.random() * 0.2})`;
+        ctx.fillStyle = `rgba(25, 38, 55, ${Math.random() * 0.2})`;
         ctx.fillRect(x, y, 1, 1);
       }
     });
@@ -105,34 +105,39 @@ export class ExhibitionHall {
       metalness: M.ceiling.metalness, envMapIntensity: M.ceiling.envMapIntensity
     });
 
-    // 踢脚线 / 顶线 — 深蓝灰金属
+    // 踢脚线 / 顶线 — 蓝灰金属（更亮）
     this.materials.baseboard = new THREE.MeshStandardMaterial({
-      color: 0x1a2540, roughness: 0.5, metalness: 0.2
+      color: 0x2a3f5a, roughness: 0.4, metalness: 0.3
     });
     this.materials.trim = new THREE.MeshStandardMaterial({
-      color: 0x1a2540, roughness: 0.5, metalness: 0.2
+      color: 0x2a3f5a, roughness: 0.4, metalness: 0.3
     });
 
-    // ── 展板：发光玻璃数据屏 ──
+    // ── 展板：发光玻璃数据屏（增强发光）──
     this.materials.panel = new THREE.MeshPhysicalMaterial({
-      color: 0x1a2540, roughness: 0.1, metalness: 0.0,
-      transparent: true, opacity: 0.92, envMapIntensity: 0.6,
-      emissive: 0x0a1a30, emissiveIntensity: 0.2
+      color: 0x1e2d42, roughness: 0.1, metalness: 0.0,
+      transparent: true, opacity: 0.92, envMapIntensity: 0.8,
+      emissive: 0x0a1a30, emissiveIntensity: 0.3
     });
     this.materials.panelHover = new THREE.MeshPhysicalMaterial({
-      color: 0x1a2540, roughness: 0.1, metalness: 0.0,
-      transparent: true, opacity: 0.96, envMapIntensity: 0.6,
-      emissive: 0x0a84ff, emissiveIntensity: 0.4
+      color: 0x1e2d42, roughness: 0.1, metalness: 0.0,
+      transparent: true, opacity: 0.96, envMapIntensity: 0.8,
+      emissive: 0x0a84ff, emissiveIntensity: 0.6
     });
 
-    // ── 自发光元素：蓝色科技点缀 ──
+    // ── 自发光元素：双色科技点缀 ──
     this.materials.edgeGlow = new THREE.MeshStandardMaterial({
       color: THEME.accent, roughness: 0.3, metalness: 0.4,
-      emissive: THEME.accent, emissiveIntensity: 1.0, envMapIntensity: 0.4
+      emissive: THEME.accent, emissiveIntensity: 1.2, envMapIntensity: 0.5
     });
     this.materials.edgeDark = new THREE.MeshStandardMaterial({
-      color: 0x2a3a55, roughness: 0.5, metalness: 0.2, envMapIntensity: 0.3
+      color: 0x2a3f5a, roughness: 0.4, metalness: 0.25, envMapIntensity: 0.4
     });
+    // 青绿色发光材质（第二强调色）
+    this.materials.cyanGlow = new THREE.MeshBasicMaterial({
+      color: THEME.cyan, transparent: true, opacity: 0.4
+    });
+    this._trackedMaterials.push(this.materials.cyanGlow);
   }
 
   // ===== 真实建筑 =====
@@ -221,10 +226,10 @@ export class ExhibitionHall {
     if (len < 5) return;
 
     // 中间高度的蓝色LED灯带
-    const stripGeo = new THREE.BoxGeometry(isLongX ? len * 0.85 : 0.03, 0.04, isLongX ? 0.03 : len * 0.85);
+    const stripGeo = new THREE.BoxGeometry(isLongX ? len * 0.85 : 0.04, 0.05, isLongX ? 0.04 : len * 0.85);
     this._geometries.push(stripGeo);
     const stripMat = new THREE.MeshBasicMaterial({
-      color: THEME.accent, transparent: true, opacity: 0.35
+      color: THEME.accent, transparent: true, opacity: 0.5
     });
     this._trackedMaterials.push(stripMat);
     const strip = new THREE.Mesh(stripGeo, stripMat);
@@ -248,11 +253,11 @@ export class ExhibitionHall {
     const rows = [-depth / 4, 0, depth / 4];
     const cols = [-width / 4, 0, width / 4];
     rows.forEach(z => cols.forEach(x => {
-      // 蓝色LED灯带（在深色天花板上）
-      const barGeo = new THREE.BoxGeometry(3, 0.03, 0.2);
+      // 蓝色LED灯带（在天花板上，更亮）
+      const barGeo = new THREE.BoxGeometry(3, 0.04, 0.25);
       this._geometries.push(barGeo);
       const barMat = new THREE.MeshBasicMaterial({
-        color: 0x4ac0ff, transparent: true, opacity: 0.6
+        color: 0x4ac0ff, transparent: true, opacity: 0.8
       });
       this._trackedMaterials.push(barMat);
       this._ceilingBars.push(barMat);
@@ -272,8 +277,8 @@ export class ExhibitionHall {
 
   createEntrance() {
     const { width, height, depth } = this.config;
-    // 入口门框 — 发光蓝色
-    const frameMat = new THREE.MeshBasicMaterial({ color: 0x1a3a60 });
+    // 入口门框 — 发光蓝色（更亮）
+    const frameMat = new THREE.MeshBasicMaterial({ color: 0x2a3f5a });
     const pillarGeo = new THREE.BoxGeometry(0.22, height, 0.35);
     this._geometries.push(pillarGeo);
     const lp = new THREE.Mesh(pillarGeo, frameMat);
@@ -287,19 +292,19 @@ export class ExhibitionHall {
     const lintel = new THREE.Mesh(lintelGeo, frameMat);
     lintel.position.set(0, height - 0.1, depth / 2);
     this.scene.add(lintel);
-    // 蓝色发光横条
-    const glowGeo = new THREE.BoxGeometry(4.6, 0.04, 0.38);
+    // 蓝色发光横条（更亮）
+    const glowGeo = new THREE.BoxGeometry(4.6, 0.05, 0.38);
     this._geometries.push(glowGeo);
-    const glowMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.5 });
+    const glowMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.7 });
     this._trackedMaterials.push(glowMat);
     const glow = new THREE.Mesh(glowGeo, glowMat);
     glow.position.set(0, height - 0.02, depth / 2);
     this.scene.add(glow);
 
-    // 入口地面蓝色引导条
+    // 入口地面蓝色引导条（更亮）
     const guideGeo = new THREE.BoxGeometry(1.5, 0.02, 8);
     this._geometries.push(guideGeo);
-    const guideMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.15 });
+    const guideMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.25 });
     this._trackedMaterials.push(guideMat);
     const guide = new THREE.Mesh(guideGeo, guideMat);
     guide.position.set(0, 0.01, depth / 2 - 4);
@@ -308,8 +313,8 @@ export class ExhibitionHall {
 
   createFloorAccents() {
     const { width, depth } = this.config;
-    // 蓝色LED边线（沿墙根）
-    const blueMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.25 });
+    // 蓝色LED边线（沿墙根，更亮）
+    const blueMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.35 });
     this._trackedMaterials.push(blueMat);
     const wallDist = 0.3;
     [
@@ -325,8 +330,8 @@ export class ExhibitionHall {
       this.scene.add(line);
     });
 
-    // 中心十字引导线
-    const crossMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.12 });
+    // 中心十字引导线（蓝 + 青双色）
+    const crossMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.18 });
     this._trackedMaterials.push(crossMat);
     const crossH = new THREE.BoxGeometry(width * 0.6, 0.015, 0.05);
     this._geometries.push(crossH);
@@ -345,7 +350,7 @@ export class ExhibitionHall {
    */
   createFloorGrid() {
     const { width, depth } = this.config;
-    const gridMat = new THREE.MeshBasicMaterial({ color: THEME.floorGrid, transparent: true, opacity: 0.15 });
+    const gridMat = new THREE.MeshBasicMaterial({ color: THEME.floorGrid, transparent: true, opacity: 0.2 });
     this._trackedMaterials.push(gridMat);
 
     // 横线
@@ -425,11 +430,11 @@ export class ExhibitionHall {
     ];
 
     corners.forEach(corner => {
-      // 柱子主体
+      // 柱子主体（更亮）
       const pGeo = new THREE.BoxGeometry(pillarSize, height * 0.95, pillarSize);
       this._geometries.push(pGeo);
       const pMat = new THREE.MeshStandardMaterial({
-        color: 0x1a2540, roughness: 0.6, metalness: 0.15
+        color: 0x2a3f5a, roughness: 0.5, metalness: 0.2
       });
       this._trackedMaterials.push(pMat);
       const pillar = new THREE.Mesh(pGeo, pMat);
@@ -438,28 +443,28 @@ export class ExhibitionHall {
       this.scene.add(pillar);
       this.walls.push(pillar);
 
-      // 柱子顶部蓝色发光帽
-      const capGeo = new THREE.BoxGeometry(pillarSize + 0.06, 0.08, pillarSize + 0.06);
+      // 柱子顶部蓝色发光帽（更亮）
+      const capGeo = new THREE.BoxGeometry(pillarSize + 0.08, 0.1, pillarSize + 0.08);
       this._geometries.push(capGeo);
-      const capMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.5 });
+      const capMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.7 });
       this._trackedMaterials.push(capMat);
       const cap = new THREE.Mesh(capGeo, capMat);
       cap.position.set(corner.x, height * 0.95, corner.z);
       this.scene.add(cap);
 
-      // 柱子底部蓝色发光底座
-      const baseGeo = new THREE.BoxGeometry(pillarSize + 0.06, 0.08, pillarSize + 0.06);
+      // 柱子底部青绿色发光底座（双色）
+      const baseGeo = new THREE.BoxGeometry(pillarSize + 0.08, 0.1, pillarSize + 0.08);
       this._geometries.push(baseGeo);
-      const baseMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.3 });
+      const baseMat = new THREE.MeshBasicMaterial({ color: THEME.cyan, transparent: true, opacity: 0.4 });
       this._trackedMaterials.push(baseMat);
       const base = new THREE.Mesh(baseGeo, baseMat);
       base.position.set(corner.x, 0.04, corner.z);
       this.scene.add(base);
     });
 
-    // 地面区域标识（蓝色发光矩形框）
+    // 地面区域标识（蓝色发光矩形框，更亮）
     const borderSize = spread + 0.5;
-    const borderMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.15 });
+    const borderMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.2 });
     this._trackedMaterials.push(borderMat);
     const bw = 0.06;
     [
@@ -475,8 +480,8 @@ export class ExhibitionHall {
       this.scene.add(line);
     });
 
-    // 展区之间的引导路径（从中心到展区）
-    const pathMat = new THREE.MeshBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.08 });
+    // 展区之间的引导路径（青绿色，更亮）
+    const pathMat = new THREE.MeshBasicMaterial({ color: THEME.cyan, transparent: true, opacity: 0.12 });
     this._trackedMaterials.push(pathMat);
     const pathLen = Math.sqrt(cx * cx + cz * cz) - 3;
     if (pathLen > 2) {
@@ -509,25 +514,36 @@ export class ExhibitionHall {
     board.userData.isBoard = true;
     panelGroup.add(board);
 
-    // 发光边框（蓝色LED）
+    // 蓝色发光边框（更亮）
     const borderGeo = new THREE.EdgesGeometry(boardGeo);
     this._geometries.push(borderGeo);
-    const borderMat = new THREE.LineBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.7 });
+    const borderMat = new THREE.LineBasicMaterial({ color: THEME.accent, transparent: true, opacity: 0.9 });
     this._trackedMaterials.push(borderMat);
     const border = new THREE.LineSegments(borderGeo, borderMat);
     border.position.copy(board.position);
     panelGroup.add(border);
 
-    // 背光面板（增强可见度）
-    const backGeo = new THREE.BoxGeometry(3, 4.2, 0.03);
+    // 背光面板（增强可见度 + 青绿色光晕）
+    const backGeo = new THREE.BoxGeometry(3.1, 4.3, 0.03);
     this._geometries.push(backGeo);
     const backMat = new THREE.MeshBasicMaterial({
-      color: THEME.accent, transparent: true, opacity: 0.06
+      color: THEME.accent, transparent: true, opacity: 0.1
     });
     this._trackedMaterials.push(backMat);
     const back = new THREE.Mesh(backGeo, backMat);
     back.position.set(x, 2, -0.15);
     panelGroup.add(back);
+
+    // 青绿色第二层背光（增加视觉深度）
+    const back2Geo = new THREE.BoxGeometry(3.3, 4.5, 0.02);
+    this._geometries.push(back2Geo);
+    const back2Mat = new THREE.MeshBasicMaterial({
+      color: THEME.cyan, transparent: true, opacity: 0.04
+    });
+    this._trackedMaterials.push(back2Mat);
+    const back2 = new THREE.Mesh(back2Geo, back2Mat);
+    back2.position.set(x, 2, -0.2);
+    panelGroup.add(back2);
 
     this.applyPanelSurface(board, panelData);
 
@@ -555,45 +571,66 @@ export class ExhibitionHall {
     const canvas = document.createElement('canvas');
     canvas.width = 512; canvas.height = 720;
     const ctx = canvas.getContext('2d');
-    // 深色底
-    ctx.fillStyle = '#0c1424'; ctx.fillRect(0, 0, 512, 720);
-    // 蓝色发光边框
+    // 明亮深色底
+    ctx.fillStyle = '#14202e'; ctx.fillRect(0, 0, 512, 720);
+    // 渐变背景（蓝到青）
+    const bgGrad = ctx.createLinearGradient(0, 0, 512, 720);
+    bgGrad.addColorStop(0, 'rgba(10,132,255,0.08)');
+    bgGrad.addColorStop(1, 'rgba(0,212,170,0.04)');
+    ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, 512, 720);
+    // 蓝色发光边框（更亮）
     ctx.strokeStyle = '#0a84ff'; ctx.lineWidth = 3;
-    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 12;
+    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 16;
     ctx.strokeRect(10, 10, 492, 700);
     ctx.shadowBlur = 0;
-    // 上方色条
-    ctx.fillStyle = 'rgba(10,132,255,0.15)'; ctx.fillRect(10, 10, 492, 60);
+    // 青绿色内边框
+    ctx.strokeStyle = 'rgba(0,212,170,0.3)'; ctx.lineWidth = 1;
+    ctx.strokeRect(16, 16, 480, 688);
+    // 上方色条（渐变）
+    const topGrad = ctx.createLinearGradient(10, 10, 502, 10);
+    topGrad.addColorStop(0, 'rgba(10,132,255,0.2)');
+    topGrad.addColorStop(1, 'rgba(0,212,170,0.1)');
+    ctx.fillStyle = topGrad; ctx.fillRect(10, 10, 492, 60);
     ctx.fillStyle = '#4ac0ff'; ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 6;
+    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 8;
     ctx.fillText((panelData.type || 'data').toUpperCase(), 30, 42);
     ctx.shadowBlur = 0;
-    // 预览框
-    ctx.strokeStyle = 'rgba(10,132,255,0.4)'; ctx.lineWidth = 1;
+    // 预览框（更亮）
+    ctx.strokeStyle = 'rgba(10,132,255,0.5)'; ctx.lineWidth = 1;
     ctx.strokeRect(50, 110, 412, 320);
-    ctx.fillStyle = '#1a2540'; ctx.fillRect(51, 111, 410, 318);
+    ctx.fillStyle = '#1a2a3e'; ctx.fillRect(51, 111, 410, 318);
     // 预览框内装饰线
-    ctx.strokeStyle = 'rgba(10,132,255,0.15)'; ctx.lineWidth = 0.5;
+    ctx.strokeStyle = 'rgba(10,132,255,0.2)'; ctx.lineWidth = 0.5;
     for (let i = 0; i < 8; i++) {
       ctx.beginPath(); ctx.moveTo(51, 111 + i * 40); ctx.lineTo(461, 111 + i * 40); ctx.stroke();
     }
+    // 垂直装饰线
+    for (let i = 1; i < 4; i++) {
+      ctx.beginPath(); ctx.moveTo(51 + i * 103, 111); ctx.lineTo(51 + i * 103, 429); ctx.stroke();
+    }
     ctx.fillStyle = '#4ac0ff'; ctx.font = '22px monospace'; ctx.textAlign = 'center';
-    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 8;
+    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 10;
     ctx.fillText('[ DATA PREVIEW ]', 256, 275);
     ctx.shadowBlur = 0;
     // 标题
-    ctx.fillStyle = '#e8edf5'; ctx.font = 'bold 34px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillStyle = '#f0f4fa'; ctx.font = 'bold 34px sans-serif'; ctx.textAlign = 'left';
     ctx.fillText(this.truncate(panelData.title, 14), 40, 500);
     // 描述
-    ctx.fillStyle = '#7a8ba5'; ctx.font = '20px sans-serif';
+    ctx.fillStyle = '#8a9cb5'; ctx.font = '20px sans-serif';
     ctx.fillText(this.truncate(panelData.description || '', 20), 40, 545);
-    // 标签
-    ctx.fillStyle = '#4ac0ff'; ctx.font = '18px sans-serif';
+    // 标签（蓝到青渐变）
+    ctx.font = '18px sans-serif';
     (panelData.tags || []).slice(0, 3).forEach((t, i) => {
+      ctx.fillStyle = i % 2 === 0 ? '#4ac0ff' : '#00d4aa';
+      ctx.shadowColor = i % 2 === 0 ? '#0a84ff' : '#00d4aa'; ctx.shadowBlur = 4;
       ctx.fillText('#' + t, 40, 590 + i * 30);
     });
-    // 底部装饰条
-    ctx.fillStyle = 'rgba(10,132,255,0.2)'; ctx.fillRect(10, 680, 492, 30);
+    ctx.shadowBlur = 0;
+    // 底部装饰条（渐变）
+    const bottomGrad = ctx.createLinearGradient(10, 680, 502, 680);
+    bottomGrad.addColorStop(0, 'rgba(10,132,255,0.25)');
+    bottomGrad.addColorStop(1, 'rgba(0,212,170,0.15)');
+    ctx.fillStyle = bottomGrad; ctx.fillRect(10, 680, 492, 30);
 
     const tex = new THREE.CanvasTexture(canvas);
     this._textures.push(tex);
@@ -648,7 +685,7 @@ export class ExhibitionHall {
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     this._geometries.push(geometry);
     const material = new THREE.PointsMaterial({
-      color: THEME.accent, size: 0.04, transparent: true, opacity: 0.25,
+      color: THEME.accent, size: 0.06, transparent: true, opacity: 0.35,
       blending: THREE.AdditiveBlending, depthWrite: false
     });
     this._trackedMaterials.push(material);
@@ -678,7 +715,7 @@ export class ExhibitionHall {
     geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     this._geometries.push(geo);
     const mat = new THREE.PointsMaterial({
-      color: THEME.accent, size: 0.05, transparent: true, opacity: 0.3,
+      color: THEME.accent, size: 0.07, transparent: true, opacity: 0.4,
       blending: THREE.AdditiveBlending, depthWrite: false
     });
     this._trackedMaterials.push(mat);

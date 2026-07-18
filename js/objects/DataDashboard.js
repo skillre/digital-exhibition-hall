@@ -54,16 +54,26 @@ export class DataDashboard {
     const height = canvas.height;
     ctx.clearRect(0, 0, width, height);
 
-    // 深色底
-    ctx.fillStyle = '#0c1424';
+    // 明亮深色底
+    ctx.fillStyle = '#14202e';
     ctx.fillRect(0, 0, width, height);
+    // 渐变背景
+    const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+    bgGrad.addColorStop(0, 'rgba(10,132,255,0.06)');
+    bgGrad.addColorStop(1, 'rgba(0,212,170,0.03)');
+    ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, width, height);
 
-    // 蓝色发光边框
-    ctx.strokeStyle = 'rgba(10,132,255,0.5)';
+    // 蓝色发光边框（更亮）
+    ctx.strokeStyle = 'rgba(10,132,255,0.6)';
     ctx.lineWidth = 2;
-    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 8;
+    ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 12;
     ctx.strokeRect(4, 4, width - 8, height - 8);
     ctx.shadowBlur = 0;
+
+    // 青绿色内边框
+    ctx.strokeStyle = 'rgba(0,212,170,0.2)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(8, 8, width - 16, height - 16);
 
     // 标题
     ctx.fillStyle = '#4ac0ff';
@@ -99,7 +109,7 @@ export class DataDashboard {
         const y = chartHeight + 55 - barHeight;
         const grad = ctx.createLinearGradient(x, y, x, chartHeight + 55);
         grad.addColorStop(0, '#0a84ff');
-        grad.addColorStop(1, '#0055cc');
+        grad.addColorStop(1, '#00d4aa');
         ctx.fillStyle = grad;
         ctx.shadowColor = '#0a84ff'; ctx.shadowBlur = 6;
         ctx.fillRect(x, y, barWidth, barHeight);
@@ -114,7 +124,7 @@ export class DataDashboard {
         ctx.fillText(value + '%', x + barWidth / 2, y - 5);
 
         // 标签
-        ctx.fillStyle = '#7a8ba5'; ctx.font = '11px sans-serif';
+        ctx.fillStyle = '#8a9cb5'; ctx.font = '11px sans-serif';
         ctx.fillText(data.labels[i], x + barWidth / 2, chartHeight + 72);
       });
     }

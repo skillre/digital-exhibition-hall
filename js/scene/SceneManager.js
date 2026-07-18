@@ -84,17 +84,19 @@ export class SceneManager {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x0c1018);
+      envScene.background = new THREE.Color(0x141c28);
 
       const panelGeo = new THREE.PlaneGeometry(10, 10);
-      const dark = new THREE.MeshBasicMaterial({ color: 0x0c1018 });
-      const mid = new THREE.MeshBasicMaterial({ color: 0x141a28 });
-      const accent = new THREE.MeshBasicMaterial({ color: 0x0a2a50 });
-      const floor = new THREE.MeshBasicMaterial({ color: 0x0a0e17 });
+      const dark = new THREE.MeshBasicMaterial({ color: 0x141c28 });
+      const mid = new THREE.MeshBasicMaterial({ color: 0x1e2d42 });
+      const accent = new THREE.MeshBasicMaterial({ color: 0x0a3060 });
+      const floor = new THREE.MeshBasicMaterial({ color: 0x121a28 });
+      // 添加亮色面板以增加反射丰富度
+      const bright = new THREE.MeshBasicMaterial({ color: 0x2a3f5a });
 
       const faces = [
         { mat: floor,  pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
-        { mat: dark,   pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
+        { mat: bright,  pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
         { mat: mid,    pos: [0, 0, -5], rot: [0, 0, 0] },
         { mat: mid,    pos: [0, 0, 5], rot: [0, Math.PI, 0] },
         { mat: accent, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
@@ -163,9 +165,25 @@ export class SceneManager {
     });
 
     // 入口处暖色引导光
-    const entryLight = new THREE.PointLight(0x4ac0ff, 0.8, 15);
+    const entryLight = new THREE.PointLight(0x4ac0ff, 1.2, 18);
     entryLight.position.set(0, 6, 18);
     this.scene.add(entryLight);
+
+    // 青绿色氛围光（第二强调色，增加空间层次）
+    const cyanLight = new THREE.PointLight(0x00d4aa, 0.6, 25);
+    cyanLight.position.set(0, 5, 0);
+    this.scene.add(cyanLight);
+
+    // 四角补光（减少大面积暗区）
+    const cornerPositions = [
+      { x: -18, z: -18 }, { x: 18, z: -18 },
+      { x: -18, z: 18 },  { x: 18, z: 18 },
+    ];
+    cornerPositions.forEach(pos => {
+      const cornerLight = new THREE.PointLight(0x1a3a60, 0.4, 15);
+      cornerLight.position.set(pos.x, 3, pos.z);
+      this.scene.add(cornerLight);
+    });
   }
 
   /**
