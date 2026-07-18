@@ -22,7 +22,7 @@ export const THEME = {
   hemisphere: { sky: 0xffffff, ground: 0x1a1e22, intensity: 0.3 },
   accent: { color: 0x00d2ff, intensity: 1.0 },
   fog: { color: 0x0a0e14, density: 0.001 },
-  bloom: { strength: 0.0, radius: 0.0, threshold: 1.0 },
+  bloom: { strength: 0.5, radius: 0.4, threshold: 0.7 },
 };
 
 // 全局配置

@@ -50,8 +50,8 @@ async function initApp() {
 
     // 创建中央装置
     // 中央装置已禁用（太亮）
-    // techCenterpiece = new TechCenterpiece();
-    // techCenterpiece.create(sceneManager.scene, { x: 0, y: 3, z: 0 });
+    techCenterpiece = new TechCenterpiece();
+    techCenterpiece.create(sceneManager.scene, { x: 0, y: 3, z: 0 });
 
     updateLoadingProgress(50, '初始化控制...');
 
@@ -200,9 +200,9 @@ function startRenderLoop() {
     }
 
     // 更新中央装置
-    // if (techCenterpiece) {
-    //   techCenterpiece.update(sceneManager.clock.getElapsedTime());
-    // }
+    if (techCenterpiece) {
+      techCenterpiece.update(sceneManager.clock.getElapsedTime());
+    }
 
     // 更新小地图
     if (minimap) {

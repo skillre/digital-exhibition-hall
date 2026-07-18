@@ -154,9 +154,23 @@ export class SceneManager {
    * 后处理：Bloom + 扫描线
    */
   createPostProcessing() {
-    // 暂时禁用后处理
-    this.composer = null;
-    console.log('后处理已禁用');
+    try {
+      const size = new THREE.Vector2();
+      this.renderer.getSize(size);
+      this.composer = new EffectComposer(this.renderer);
+      this.composer.addPass(new RenderPass(this.scene, this.camera));
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(size.x, size.y),
+        THEME.bloom.strength,
+        THEME.bloom.radius,
+        THEME.bloom.threshold
+      );
+      this.composer.addPass(bloomPass);
+      console.log('后处理初始化完成');
+    } catch (e) {
+      console.error('后处理初始化失败:', e);
+      this.composer = null;
+    }
   }
 
   addObject(object) {

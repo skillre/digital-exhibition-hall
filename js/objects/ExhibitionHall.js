@@ -37,8 +37,7 @@ export class ExhibitionHall {
     this.createWalls();
     this.createCeiling();
     this.createDecorations();
-    // 粒子已禁用（太吵）
-    // this.createEntranceParticles();
+    this.createEntranceParticles();
     console.log('展厅创建完成');
   }
 
@@ -125,6 +124,7 @@ export class ExhibitionHall {
       this.walls.push(this.createWallMesh(c));
       this.createBaseboard(c);
       this.createCrownMolding(c);
+      this.createWallPanels(c); // 墙面装饰面板
     });
   }
 
@@ -174,6 +174,36 @@ export class ExhibitionHall {
     this.scene.add(mold);
   }
 
+  createWallPanels(wallConfig) {
+    const { size, position } = wallConfig;
+    const isLongX = size[0] >= size[2];
+    const len = isLongX ? size[0] : size[2];
+    if (len < 5) return;
+    const panelCount = Math.floor(len / 4);
+    for (let i = 0; i < panelCount; i++) {
+      const offset = -len/2 + 2 + i * (len / panelCount) + (len / panelCount) / 2;
+      const px = isLongX ? position[0] + offset : position[0];
+      const pz = isLongX ? position[2] : position[2] + offset;
+      const panelW = isLongX ? (len / panelCount) * 0.55 : 0.02;
+      const panelH = size[1] * 0.35;
+      const panelD = isLongX ? 0.02 : (len / panelCount) * 0.55;
+      const panelGeo = new THREE.BoxGeometry(panelW, panelH, panelD);
+      this._geometries.push(panelGeo);
+      const panelMat = new THREE.MeshStandardMaterial({ color: 0xe8e8ec, roughness: 0.7, metalness: 0.1 });
+      this._trackedMaterials.push(panelMat);
+      const panel = new THREE.Mesh(panelGeo, panelMat);
+      panel.position.set(px, size[1] * 0.5, pz);
+      this.scene.add(panel);
+      const borderGeo = new THREE.EdgesGeometry(panelGeo);
+      this._geometries.push(borderGeo);
+      const borderMat = new THREE.LineBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.35 });
+      this._trackedMaterials.push(borderMat);
+      const border = new THREE.LineSegments(borderGeo, borderMat);
+      border.position.copy(panel.position);
+      this.scene.add(border);
+    }
+  }
+
   createCeiling() {
     const { width, height, depth } = this.config;
     const geometry = new THREE.PlaneGeometry(width, depth);
@@ -212,9 +242,8 @@ export class ExhibitionHall {
 
   createEntrance() {
     const { width, height, depth } = this.config;
-    // 简洁的白色门框
     const frameMat = new THREE.MeshBasicMaterial({ color: 0xd0d4d8 });
-    const pillarGeo = new THREE.BoxGeometry(0.15, height, 0.25);
+    const pillarGeo = new THREE.BoxGeometry(0.18, height, 0.3);
     this._geometries.push(pillarGeo);
     const lp = new THREE.Mesh(pillarGeo, frameMat);
     lp.position.set(-2, height / 2, depth / 2);
@@ -222,29 +251,49 @@ export class ExhibitionHall {
     const rp = new THREE.Mesh(pillarGeo, frameMat);
     rp.position.set(2, height / 2, depth / 2);
     this.scene.add(rp);
-    const lintelGeo = new THREE.BoxGeometry(4.2, 0.12, 0.25);
+    const lintelGeo = new THREE.BoxGeometry(4.2, 0.15, 0.3);
     this._geometries.push(lintelGeo);
     const lintel = new THREE.Mesh(lintelGeo, frameMat);
-    lintel.position.set(0, height - 0.06, depth / 2);
+    lintel.position.set(0, height - 0.08, depth / 2);
     this.scene.add(lintel);
+    // 蓝色发光横条
+    const glowGeo = new THREE.BoxGeometry(4.2, 0.02, 0.32);
+    this._geometries.push(glowGeo);
+    const glowMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.6 });
+    this._trackedMaterials.push(glowMat);
+    const glow = new THREE.Mesh(glowGeo, glowMat);
+    glow.position.set(0, height - 0.02, depth / 2);
+    this.scene.add(glow);
   }
 
   createFloorAccents() {
-    // 简洁的地面边缘线
     const { width, depth } = this.config;
-    const blueMat = new THREE.MeshBasicMaterial({
-      color: 0x00d2ff, transparent: true, opacity: 0.4
-    });
+    // 蓝色LED边线
+    const blueMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.6 });
     this._trackedMaterials.push(blueMat);
-    const wallDist = 0.3;
+    const wallDist = 0.25;
     [
-      { x: 0, z: -depth/2 + wallDist, sx: width * 0.8, sz: 0.02 },
-      { x: 0, z: depth/2 - wallDist, sx: width * 0.8, sz: 0.02 },
+      { x: 0, z: -depth/2 + wallDist, sx: width, sz: 0.04 },
+      { x: 0, z: depth/2 - wallDist, sx: width, sz: 0.04 },
+      { x: -width/2 + wallDist, z: 0, sx: 0.04, sz: depth },
+      { x: width/2 - wallDist, z: 0, sx: 0.04, sz: depth },
     ].forEach(({ x, z, sx, sz }) => {
-      const geo = new THREE.BoxGeometry(sx, 0.01, sz);
+      const geo = new THREE.BoxGeometry(sx, 0.02, sz);
       this._geometries.push(geo);
       const line = new THREE.Mesh(geo, blueMat);
-      line.position.set(x, 0.005, z);
+      line.position.set(x, 0.01, z);
+      this.scene.add(line);
+    });
+    // 中心十字线
+    const centerMat = new THREE.MeshBasicMaterial({ color: 0x00d2ff, transparent: true, opacity: 0.25 });
+    this._trackedMaterials.push(centerMat);
+    [{ sx: 0.03, sz: depth, px: 0, pz: 0 },
+     { sx: width, sz: 0.03, px: 0, pz: 0 }
+    ].forEach(({ sx, sz, px, pz }) => {
+      const geo = new THREE.BoxGeometry(sx, 0.01, sz);
+      this._geometries.push(geo);
+      const line = new THREE.Mesh(geo, centerMat);
+      line.position.set(px, 0.005, pz);
       this.scene.add(line);
     });
   }
