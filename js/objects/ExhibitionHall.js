@@ -63,15 +63,19 @@ export class ExhibitionHall {
     // ── 建筑面：统一走「受光」PBR（明亮科技）──
     // 地面带网格纹理
     const floorTex = this.createProceduralTexture(512, 512, (ctx, w, h) => {
-      ctx.fillStyle = '#1a2838'; ctx.fillRect(0, 0, w, h);
-      // 亮色网格线
-      ctx.strokeStyle = 'rgba(42, 63, 90, 0.9)'; ctx.lineWidth = 1;
+      ctx.fillStyle = '#e6ecf4'; ctx.fillRect(0, 0, w, h);
+      // 蓝灰网格线
+      ctx.strokeStyle = 'rgba(150, 170, 200, 0.55)'; ctx.lineWidth = 1;
       for (let i = 0; i <= w; i += 32) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke(); }
       for (let j = 0; j <= h; j += 32) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(w, j); ctx.stroke(); }
-      // 噪点（更亮）
-      for (let k = 0; k < 2000; k++) {
+      // 深一点的主网格（每 128px）增加科技感
+      ctx.strokeStyle = 'rgba(120, 145, 185, 0.5)'; ctx.lineWidth = 1.5;
+      for (let i = 0; i <= w; i += 128) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke(); }
+      for (let j = 0; j <= h; j += 128) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(w, j); ctx.stroke(); }
+      // 轻微噪点（浅底细节）
+      for (let k = 0; k < 1200; k++) {
         const x = Math.random() * w, y = Math.random() * h;
-        ctx.fillStyle = `rgba(30, 45, 66, ${Math.random() * 0.3})`;
+        ctx.fillStyle = `rgba(200, 210, 226, ${Math.random() * 0.25})`;
         ctx.fillRect(x, y, 1, 1);
       }
     });
@@ -83,14 +87,14 @@ export class ExhibitionHall {
 
     // 墙面带微弱纹理
     const wallTex = this.createProceduralTexture(256, 256, (ctx, w, h) => {
-      ctx.fillStyle = '#1e2d42'; ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#e8eef5'; ctx.fillRect(0, 0, w, h);
       // 水平细线纹理
-      ctx.strokeStyle = 'rgba(30, 45, 66, 0.4)'; ctx.lineWidth = 0.5;
+      ctx.strokeStyle = 'rgba(170, 188, 214, 0.35)'; ctx.lineWidth = 0.5;
       for (let i = 0; i <= h; i += 8) { ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(w, i); ctx.stroke(); }
-      // 噪点
-      for (let k = 0; k < 1000; k++) {
+      // 轻微噪点
+      for (let k = 0; k < 800; k++) {
         const x = Math.random() * w, y = Math.random() * h;
-        ctx.fillStyle = `rgba(25, 38, 55, ${Math.random() * 0.2})`;
+        ctx.fillStyle = `rgba(205, 216, 230, ${Math.random() * 0.18})`;
         ctx.fillRect(x, y, 1, 1);
       }
     });

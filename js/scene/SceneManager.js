@@ -76,29 +76,27 @@ export class SceneManager {
   }
 
   /**
-   * 创建环境贴图 — 深色科技
-   * 给 PBR 建筑面提供深色调反射环境。
+   * 创建环境贴图 — 明亮科技
+   * 给 PBR 建筑面提供浅冷调反射环境，避免浅底受光面反射出暗色。
    */
   createEnvironment() {
     try {
       const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
       pmremGenerator.compileEquirectangularShader();
       const envScene = new THREE.Scene();
-      envScene.background = new THREE.Color(0x141c28);
+      envScene.background = new THREE.Color(0xeef3f9);
 
       const panelGeo = new THREE.PlaneGeometry(10, 10);
-      const dark = new THREE.MeshBasicMaterial({ color: 0x141c28 });
-      const mid = new THREE.MeshBasicMaterial({ color: 0x1e2d42 });
-      const accent = new THREE.MeshBasicMaterial({ color: 0x0a3060 });
-      const floor = new THREE.MeshBasicMaterial({ color: 0x121a28 });
-      // 添加亮色面板以增加反射丰富度
-      const bright = new THREE.MeshBasicMaterial({ color: 0x2a3f5a });
+      const sky   = new THREE.MeshBasicMaterial({ color: 0xf2f6fb }); // 天花亮
+      const wall  = new THREE.MeshBasicMaterial({ color: 0xe2e9f2 }); // 墙面浅蓝白
+      const accent = new THREE.MeshBasicMaterial({ color: 0xcdddf2 }); // 添蓝反射
+      const floor = new THREE.MeshBasicMaterial({ color: 0xd6dfec }); // 地面浅灰蓝
 
       const faces = [
         { mat: floor,  pos: [0, -5, 0], rot: [-Math.PI / 2, 0, 0] },
-        { mat: bright,  pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
-        { mat: mid,    pos: [0, 0, -5], rot: [0, 0, 0] },
-        { mat: mid,    pos: [0, 0, 5], rot: [0, Math.PI, 0] },
+        { mat: sky,    pos: [0, 5, 0], rot: [Math.PI / 2, 0, 0] },
+        { mat: wall,   pos: [0, 0, -5], rot: [0, 0, 0] },
+        { mat: wall,   pos: [0, 0, 5], rot: [0, Math.PI, 0] },
         { mat: accent, pos: [-5, 0, 0], rot: [0, Math.PI / 2, 0] },
         { mat: accent, pos: [5, 0, 0], rot: [0, -Math.PI / 2, 0] },
       ];
@@ -143,13 +141,13 @@ export class SceneManager {
     dir.shadow.bias = -0.0005;
     this.scene.add(dir);
 
-    // 蓝色科技补光（空间氛围）
+    // 蓝色科技补光（空间氛围，浅底下只做轻微添蓝）
     const ac = this.lightingConfig.accent;
     const accent = new THREE.PointLight(ac.color, ac.intensity, 40);
     accent.position.set(0, 7, 0);
     this.scene.add(accent);
 
-    // 四个展区的蓝色聚光灯
+    // 四个展区的蓝色聚光灯（浅底下调低强度，只做区域重点）
     const zonePositions = [
       { x: -11, z: 0 },   // 服务方案
       { x: 11, z: 0 },    // 案例成果
@@ -157,30 +155,30 @@ export class SceneManager {
       { x: 0, z: 11 },    // 技术文档
     ];
     zonePositions.forEach(pos => {
-      const spot = new THREE.SpotLight(0x0a84ff, 1.5, 20, Math.PI / 5, 0.6, 1);
+      const spot = new THREE.SpotLight(0xdcebff, 0.5, 22, Math.PI / 5, 0.7, 1);
       spot.position.set(pos.x, 9, pos.z);
       spot.target.position.set(pos.x, 0, pos.z);
       this.scene.add(spot);
       this.scene.add(spot.target);
     });
 
-    // 入口处暖色引导光
-    const entryLight = new THREE.PointLight(0x4ac0ff, 1.2, 18);
+    // 入口处冷白引导光
+    const entryLight = new THREE.PointLight(0xeaf2ff, 0.5, 18);
     entryLight.position.set(0, 6, 18);
     this.scene.add(entryLight);
 
-    // 青绿色氛围光（第二强调色，增加空间层次）
-    const cyanLight = new THREE.PointLight(0x00d4aa, 0.6, 25);
+    // 青绿色氛围光（第二强调色，浅底下极弱以免偏色）
+    const cyanLight = new THREE.PointLight(0x00d4aa, 0.12, 25);
     cyanLight.position.set(0, 5, 0);
     this.scene.add(cyanLight);
 
-    // 四角补光（减少大面积暗区）
+    // 四角补光（浅底空间已无大面积暗区，只做极弱冷白补光防死角）
     const cornerPositions = [
       { x: -18, z: -18 }, { x: 18, z: -18 },
       { x: -18, z: 18 },  { x: 18, z: 18 },
     ];
     cornerPositions.forEach(pos => {
-      const cornerLight = new THREE.PointLight(0x1a3a60, 0.4, 15);
+      const cornerLight = new THREE.PointLight(0xdbe6f4, 0.2, 16);
       cornerLight.position.set(pos.x, 3, pos.z);
       this.scene.add(cornerLight);
     });

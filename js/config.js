@@ -1,21 +1,23 @@
 /**
  * 应用配置与状态
- * 视觉方向：深色科技沉浸（Cyber Dark）
- *   - 深蓝黑空间 + 蓝色科技发光点缀
- *   - 建筑面统一走「受光」材质（MeshStandardMaterial），暗调为主
+ * 视觉方向：明亮科技（Bright Blue-White Tech）
+ *   - 浅蓝白空间（明亮但不刺眼）+ 蓝色科技发光点缀
+ *   - 建筑面统一走「受光」材质（MeshStandardMaterial），浅冷调为主
  *   - 自发光元素（LED 灯带 / 展板边框 / 中央装置）用 emissive / Basic，不受灯光影响
  *
  * 这里是全项目唯一配色来源，请勿在各模块散落硬编码颜色。
+ * 亮度调节只在三处：灯光强度、THEME.exposure、THEME.bloom。切勿把墙面直接改成纯白，
+ * 否则叠加曝光 + Bloom 会导致「白到刺眼」。
  */
 
 // ── 设计令牌 ─────────────────────────────────────────────
 export const THEME = {
-  // 空间基调（明亮科技深色）
-  bg:        0x101825,   // 背景 / 远景（中性深蓝灰）
-  wall:      0x1e2d42,   // 墙面（明亮蓝灰）
-  ceiling:   0x182535,   // 天花板（中性深蓝）
-  floor:     0x1a2838,   // 地面（中性灰蓝）
-  floorGrid: 0x2a3f5a,   // 地面网格线（更亮）
+  // 空间基调（明亮科技浅蓝白，刻意避开纯白以防眩光）
+  bg:        0xdfe8f2,   // 背景 / 远景（浅蓝白）
+  wall:      0xdfe7f0,   // 墙面（浅冷灰蓝）
+  ceiling:   0xeef3f9,   // 天花板（最亮，柔白）
+  floor:     0xd0dae8,   // 地面（浅蓝灰，略深以稳住空间）
+  floorGrid: 0x9fb2cc,   // 地面网格线（中蓝灰，浅底上可见）
 
   // 双色科技强调（蓝 + 青）
   accent:    0x0a84ff,   // 主蓝
@@ -30,31 +32,31 @@ export const THEME = {
   threat:    0xff453a,
 
   // 文字（用于 3D Canvas 纹理 / HUD）
-  ink:       0xf0f4fa,   // 浅白字（更亮）
-  inkDim:    0x8a9cb5,   // 灰字（更亮）
+  ink:       0x1a2740,   // 深蓝黑字（浅底上可读）
+  inkDim:    0x5a6b85,   // 灰蓝字
 
-  // ── 明度控制（明亮科技基调 + 双色发光）──
+  // ── 明度控制（明亮科技基调：柔和均匀，避免眩光）──
   lighting: {
-    ambient:     { color: 0x2a3a55, intensity: 0.5 },
-    hemisphere:  { sky: 0x2a3a55, ground: 0x101825, intensity: 0.6 },
-    directional: { color: 0xd8e4f4, intensity: 0.9, position: { x: 6, y: 12, z: 6 } },
-    // 蓝色科技补光（核心氛围光）
-    accent:      { color: 0x0a84ff, intensity: 1.8 },
+    ambient:     { color: 0xffffff, intensity: 0.75 },
+    hemisphere:  { sky: 0xeaf2ff, ground: 0xcdd8e6, intensity: 0.95 },
+    directional: { color: 0xffffff, intensity: 1.15, position: { x: 6, y: 12, z: 6 } },
+    // 蓝色科技补光（点缀氛围，浅底空间下大幅调低以防蓝色泛滥/过曝）
+    accent:      { color: 0x0a84ff, intensity: 0.35 },
   },
-  exposure: 1.1,        // ACESFilmic 曝光（提升整体亮度）
+  exposure: 1.0,        // ACESFilmic 曝光（1.0 中性，浅底无需再抬亮）
 
-  // 材质参数（受光建筑面统一 PBR，增加反射）
+  // 材质参数（受光建筑面统一 PBR；浅底面降低金属度、提高粗糙度，做哑光磨砂质感，避免镜面反射变暗）
   material: {
-    floor:   { roughness: 0.25, metalness: 0.35, envMapIntensity: 0.6 },
-    wall:    { roughness: 0.55, metalness: 0.12, envMapIntensity: 0.5 },
-    ceiling: { roughness: 0.7,  metalness: 0.05, envMapIntensity: 0.3 },
+    floor:   { roughness: 0.5,  metalness: 0.12, envMapIntensity: 0.35 },
+    wall:    { roughness: 0.75, metalness: 0.04, envMapIntensity: 0.25 },
+    ceiling: { roughness: 0.85, metalness: 0.02, envMapIntensity: 0.2 },
   },
 
-  // 雾（融入背景色，减弱以增加可见度）
-  fog: { color: 0x101825, density: 0.012 },
+  // 雾（融入浅色背景，做出空间纵深但不糊）
+  fog: { color: 0xe4ecf5, density: 0.006 },
 
-  // Bloom（增强发光感，降低阈值让更多元素参与）
-  bloom: { strength: 0.8, radius: 0.5, threshold: 0.5 },
+  // Bloom（浅底场景只让真正的高亮发光体溢光，阈值抬高、强度调低以防「白到刺眼」）
+  bloom: { strength: 0.28, radius: 0.4, threshold: 0.82 },
 };
 
 // ── 全局配置 ─────────────────────────────────────────────
